@@ -1,6 +1,9 @@
 
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Context;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +12,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+#region Add connection string
 builder.Services.AddDbContext<OnlineShopContext>(option =>
-    option.UseSqlServer(builder.Configuration["connectionstrings:defaultconnection"])
+    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+#endregion
+
+#region Add Identity service
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Password.RequiredLength = 6;
+}).AddEntityFrameworkStores<OnlineShopContext>()
+    .AddDefaultTokenProviders();
+#endregion
 
 #endregion
 
