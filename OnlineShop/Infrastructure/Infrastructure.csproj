@@ -12,7 +12,7 @@
 	<Folder Include="Persistence\Fluent_Configuration\" />
 	 <Folder Include="Identity\" />
 	 <Folder Include="Repositories\" />
-	 <Folder Include="SqlQuery"/>
+	 <Folder Include="SqlQuery\" />
   </ItemGroup>
 
   <ItemGroup>
