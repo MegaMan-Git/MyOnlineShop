@@ -1,8 +1,7 @@
-
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.Context;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
+using Infrastructure.Persistence.Context;
+using Infrastructure.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +18,7 @@ builder.Services.AddDbContext<OnlineShopContext>(option =>
 #endregion
 
 #region Add Identity service
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
     options.Password.RequireUppercase = false;

@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using Application.Entities;
 using Domain.Entities;
+using Infrastructure.Identity;
+using Infrastructure.Persistence.Fluent_Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Context;
+namespace Infrastructure.Persistence.Context;
 
-public partial class OnlineShopContext : IdentityDbContext<IdentityUser, IdentityRole, string>
+public partial class OnlineShopContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
 {
 
     public OnlineShopContext(DbContextOptions<OnlineShopContext> options)
@@ -33,6 +35,8 @@ public partial class OnlineShopContext : IdentityDbContext<IdentityUser, Identit
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        #region Default Scaffold FluentApi
         modelBuilder.UseCollation("Persian_100_CI_AS_SC_UTF8");
 
         modelBuilder.Entity<Cart>(entity =>
@@ -88,6 +92,27 @@ public partial class OnlineShopContext : IdentityDbContext<IdentityUser, Identit
         });
 
         OnModelCreatingPartial(modelBuilder);
+        #endregion
+
+        
+        modelBuilder.ApplyConfiguration(new Cart_Config());
+        modelBuilder.ApplyConfiguration(new Order_Config());
+        modelBuilder.ApplyConfiguration(new Payment_Config());
+        modelBuilder.ApplyConfiguration(new Product_Config());
+        modelBuilder.ApplyConfiguration(new Role_Config());
+        modelBuilder.ApplyConfiguration(new User_Config());
+
+        // Add Relation User With Tables
+        modelBuilder.Entity<ApplicationUser>()
+            .HasOne(a => a.Cart)
+            .WithOne()
+            .HasForeignKey<Cart>(c => c.UserId);
+
+        modelBuilder.Entity<ApplicationUser>()
+            .HasMany(a => a.orders)
+            .WithOne()
+            .HasForeignKey(o => o.UserId);
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

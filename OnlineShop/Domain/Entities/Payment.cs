@@ -14,4 +14,7 @@ public class Payment
     public string Status { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
+
+    
+    public Order? Order { get; set; }
 }

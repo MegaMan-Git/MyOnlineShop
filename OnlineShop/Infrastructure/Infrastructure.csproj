@@ -7,11 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Context\" />
-    <Folder Include="Identity\" />
-    <Folder Include="Migrations\" />
-    <Folder Include="Repositories\" />
-    <Folder Include="SqlQuery\" />
+    <Folder Include="Persistence\Context\" />
+    <Folder Include="Persistence\Migrations\" />
+	<Folder Include="Persistence\Fluent_Configuration\" />
+	 <Folder Include="Identity\" />
+	 <Folder Include="Repositories\" />
+	 <Folder Include="SqlQuery"/>
   </ItemGroup>
 
   <ItemGroup>
