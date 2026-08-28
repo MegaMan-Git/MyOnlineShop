@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\Auth\" />
     <Folder Include="Dtos\Cart\Cartitem\" />
     <Folder Include="Dtos\Category\" />
     <Folder Include="Dtos\Payment\" />
