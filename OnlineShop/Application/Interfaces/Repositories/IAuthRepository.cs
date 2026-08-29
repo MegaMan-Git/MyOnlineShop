@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Application.Dtos.Auth;
+using Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,13 +8,15 @@ namespace Application.Interfaces.Repositories
 {
     public interface IAuthRepository
     {
-        public Task<bool> FindUser();
+        Task<bool> IsUserExistAsync(string Email);
 
-        public Task<bool> SignIn();
+        Task<Result> SignUpAsync(RegisterDto register);
 
-        public Task<string> RestPassword_CreateToken();
-
-        public Task<string> RestPassword();
+        Task<bool> SignInAsync(LoginDto login);
+        
+        Task<string> GeneratePasswordResetTokenAsync(ForgotPasswordDto forgotPassword);
+        
+        Task<bool> ResetPasswordAsync(string token,string email,RestPasswordDto restPassword);
 
     }
 }
