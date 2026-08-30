@@ -15,7 +15,9 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             builder
                 .HasMany(o => o.orderItems)
                 .WithOne(oi => oi.Order)
-                .HasForeignKey(oi => oi.OrderId);
+                .HasForeignKey(oi => oi.OrderId)
+                 //If the order is deleted, then the order items will be deleted.
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

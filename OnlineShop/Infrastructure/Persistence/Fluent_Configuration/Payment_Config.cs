@@ -17,6 +17,7 @@ namespace Infrastructure.Persistence.Fluent_Configuration
                 .HasOne(p => p.Order)
                 .WithOne(o => o.Payment)
                 .HasForeignKey<Payment>(p=>p.OrderId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             builder

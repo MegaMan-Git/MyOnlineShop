@@ -16,7 +16,8 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             builder
                  .HasOne(p => p.Category)
                  .WithMany(c => c.products)
-                 .HasForeignKey(p => p.CategoryId);
+                 .HasForeignKey(p => p.CategoryId)
+                 .OnDelete(DeleteBehavior.Restrict);
         
             // Product 1 <--> N CartItem
             builder

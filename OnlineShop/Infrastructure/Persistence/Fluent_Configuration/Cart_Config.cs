@@ -15,7 +15,9 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             builder
                 .HasMany(ci => ci.CartItems)
                 .WithOne(c => c.Cart)
-                .HasForeignKey(ci => ci.CartId);
+                .HasForeignKey(ci => ci.CartId)
+                //If the cart is deleted, then the cart items will be deleted.
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder
                 .HasIndex(ci => ci.UserId)
