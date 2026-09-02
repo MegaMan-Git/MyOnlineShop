@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Dtos\Payment\" />
-    <Folder Include="Dtos\Order\OrderItem\" />
     <Folder Include="Interfaces\Services\" />
     <Folder Include="Validators\" />
     <Folder Include="Services\" />
