@@ -2,7 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Identity;
-
+using Application.Interfaces.Repositories;
+using Application.Interfaces.UnitOfWork;
+using Infrastructure.Repositories;
+using Infrastructure.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +37,15 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Password.RequiredLength = 6;
 }).AddEntityFrameworkStores<OnlineShopContext>()
     .AddDefaultTokenProviders();
+#endregion
+
+#region Ioc Container
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 #endregion
 
 #endregion
