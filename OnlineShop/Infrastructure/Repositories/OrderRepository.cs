@@ -113,7 +113,6 @@ namespace Infrastructure.Repositories
         public async Task AddOrderAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
-            await _context.SaveChangesAsync();
         }
 
         public async Task AddOrderItemAsync(OrderItem orderItem)
@@ -132,7 +131,6 @@ namespace Infrastructure.Repositories
                 OrderId = orderId,
                 CreatedAt = DateTime.UtcNow,
             });
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -140,7 +138,6 @@ namespace Infrastructure.Repositories
         public async Task UpdatePaymentStatusAsync(Payment payment)
         {
             _context.Payments.Update(payment);
-            await _context.SaveChangesAsync();
         }
         #endregion
     }

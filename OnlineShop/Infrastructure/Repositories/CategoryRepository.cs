@@ -36,7 +36,6 @@ namespace Infrastructure.Repositories
         public async Task AddCategoryAsync(Category category)
         {
             await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -44,7 +43,6 @@ namespace Infrastructure.Repositories
         public async Task UpdateCategoryAsync(Category category)
         {
             _context.Categories.Update(category);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -52,7 +50,6 @@ namespace Infrastructure.Repositories
         public async Task DeleteCategoryAsync(Category category)
         {
             _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
         }
         #endregion
 

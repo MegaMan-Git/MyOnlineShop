@@ -37,7 +37,6 @@ namespace Infrastructure.Repositories
         public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -45,7 +44,6 @@ namespace Infrastructure.Repositories
         public async Task UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -53,7 +51,6 @@ namespace Infrastructure.Repositories
         public async Task DeleteProductAsync(Product product)
         {
            _context.Products.Remove(product);
-           await _context.SaveChangesAsync();
         }
         #endregion
 

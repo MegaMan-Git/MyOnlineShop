@@ -101,13 +101,11 @@ namespace Infrastructure.Repositories
         public async Task AddCartAsync(Cart cart)
         {
             await _context.Carts.AddAsync(cart);
-            await _context.SaveChangesAsync();
         }
 
         public async Task AddCartItemAsync(CartItem cartItem)
         {
             await _context.CartItems.AddAsync(cartItem);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -115,7 +113,6 @@ namespace Infrastructure.Repositories
         public async Task UpdateCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Update(cartItem);
-            await _context.SaveChangesAsync();
         }
         #endregion
 
@@ -123,13 +120,11 @@ namespace Infrastructure.Repositories
         public async Task DeleteCartAsync(Cart cart)
         {
             _context.Carts.Remove(cart);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
-            await _context.SaveChangesAsync();
         }
         #endregion
     }
