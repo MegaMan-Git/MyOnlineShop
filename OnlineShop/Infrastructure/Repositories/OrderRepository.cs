@@ -1,14 +1,9 @@
 ﻿using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
-using Application.Dtos.Payment;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Channels;
 
 namespace Infrastructure.Repositories
 {
@@ -23,7 +18,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Get AllOrder&OrderItem
+        #region Get AllOrders&OrderItems
         public async Task<IEnumerable<AdminOrderDto>> GetAllOrdersForAdminAsync()
         {
             return await (
@@ -53,15 +48,21 @@ namespace Infrastructure.Repositories
                     OrderId = order.Id,
                     UserName = user.UserName,
                     ProductName = product.ProductName,
-                    Price = product.Price,
-                    TotalPrice = product.Price * orderitem.Quantity,
+                    Price = orderitem.UnitPrice,
+                    TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
                     Quantity = orderitem.Quantity
                 }).ToListAsync();
         }
         #endregion
 
-        #region Get OrderItems&Payment
-        public async Task<CustomerOrderItemDto?> GetOrderItemAsync(int orderItemId, int orderId)
+        #region Get Order&OrderItems&Payment
+        public async Task<Order?> GetOrderAsync(int orderId, string userId)
+        {
+            return await _context.Orders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+        }
+        public async Task<CustomerOrderItemDto?> GetOrderItemAsync(int orderId, int orderItemId)
         {
             return await (
                 from orderitem in _context.OrderItems
@@ -95,7 +96,7 @@ namespace Infrastructure.Repositories
                     ProductName = product.ProductName,
                     Price = orderitem.UnitPrice,
                     TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
-                    Quantity = orderitem.Quantity,                  
+                    Quantity = orderitem.Quantity,
                 }).ToListAsync();
         }
 
@@ -109,12 +110,10 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Add Order&OrderItem
-        public async Task<int> AddOrderAsync(Order order)
+        public async Task AddOrderAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
-
-            return order.Id;
         }
 
         public async Task AddOrderItemAsync(OrderItem orderItem)
@@ -130,7 +129,7 @@ namespace Infrastructure.Repositories
             await _context.Payments.AddAsync(new Payment
             {
                 Amount = totalPrice,
-                OrderId= orderId,
+                OrderId = orderId,
                 CreatedAt = DateTime.UtcNow,
             });
             await _context.SaveChangesAsync();

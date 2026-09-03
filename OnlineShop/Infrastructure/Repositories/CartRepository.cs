@@ -3,11 +3,7 @@ using Application.Dtos.Cart.Cartitem;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
-using Infrastructure.Persistence.Fluent_Configuration;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories
 {
@@ -25,15 +21,15 @@ namespace Infrastructure.Repositories
         #region Get AllCart&CartItem
         public async Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync()
         {
-            return await(
-                from cart in _context.Carts 
+            return await (
+                from cart in _context.Carts
                 join user in _context.Users
                     on cart.UserId equals user.Id
-                    select new AdminCartDto
-                    {
-                        Id = cart.Id,
-                        UserName = user.UserName
-                    }).ToListAsync();
+                select new AdminCartDto
+                {
+                    Id = cart.Id,
+                    UserName = user.UserName
+                }).ToListAsync();
         }
 
         public async Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync()
@@ -66,7 +62,7 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(c => c.UserId == userId);
         }
 
-        public async Task<CartItem?> GetCartItemAsync(int cartItemId,int cartId)
+        public async Task<CartItem?> GetCartItemAsync(int cartItemId, int cartId)
         {
             return await _context.CartItems
                 .AsNoTracking()
@@ -82,31 +78,30 @@ namespace Infrastructure.Repositories
 
         public async Task<IEnumerable<CustomerCartItemDto>> GetCartItemsAsync(int cartId)
         {
-            return await (from cartitem in _context.CartItems
-                          join product in _context.Products
-                          on cartitem.ProductId equals product.Id
-                          where cartitem.CartId == cartId
-                          select new CustomerCartItemDto
-                          {
-                              Id = cartitem.Id,
-                              CartId = cartitem.CartId,
-                              ProductId = product.Id,
-                              ProductName = product.ProductName,
-                              Quantity = cartitem.Quantity,
-                              Price = product.Price,
-                              TotalPrice = product.Price * cartitem.Quantity
-                          }).ToListAsync();
+            return await (
+                from cartitem in _context.CartItems
+                join product in _context.Products
+                on cartitem.ProductId equals product.Id
+                where cartitem.CartId == cartId
+                select new CustomerCartItemDto
+                {
+                    Id = cartitem.Id,
+                    CartId = cartitem.CartId,
+                    ProductId = product.Id,
+                    ProductName = product.ProductName,
+                    Quantity = cartitem.Quantity,
+                    Price = product.Price,
+                    TotalPrice = product.Price * cartitem.Quantity
+                }).ToListAsync();
         }
 
         #endregion
 
-        #region Add Cart&CartItems
-        public async Task<int> AddCartAsync(Cart cart)
+        #region Add Cart&CartItem
+        public async Task AddCartAsync(Cart cart)
         {
             await _context.Carts.AddAsync(cart);
             await _context.SaveChangesAsync();
-
-            return cart.Id;
         }
 
         public async Task AddCartItemAsync(CartItem cartItem)
@@ -137,6 +132,5 @@ namespace Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
         #endregion
-
     }
 }

@@ -2,19 +2,14 @@
 using Application.Interfaces.Repositories;
 using Domain.Common;
 using Infrastructure.Identity;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories
 {
     public class AuthRepository : IAuthRepository
     {
         #region DI
-        private UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         public AuthRepository(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
@@ -39,9 +34,7 @@ namespace Infrastructure.Repositories
                 return string.Empty;
             }
 
-            string token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            return token;
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
         }
         #endregion
 
@@ -80,7 +73,7 @@ namespace Infrastructure.Repositories
         #region SignUp
         public async Task<Result> SignUpAsync(RegisterDto register)
         {
-            Result result = new Result();
+            Result result = new();
 
             //Create User
             var identityResult = await _userManager.CreateAsync(new ApplicationUser
@@ -109,6 +102,5 @@ namespace Infrastructure.Repositories
 
         }
         #endregion
-
     }
 }

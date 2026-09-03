@@ -2,9 +2,6 @@
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories
 {
@@ -18,7 +15,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Get Product
+        #region GetProduct
         public async Task<Product?> GetProductByIdAsync(int id)
         {
             return await _context.Products
@@ -36,14 +33,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region IsProductNameDuplicate
-        public async Task<bool> IsProductNameDuplicateAsync(string productName)
-        {
-            return await _context.Products.AnyAsync(p => p.ProductName == productName);
-        }
-        #endregion
-
-        #region Add Product
+        #region AddProduct
         public async Task AddProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);
@@ -51,7 +41,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Update
+        #region UpdateProduct
         public async Task UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
@@ -59,7 +49,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Delete
+        #region DeleteProduct
         public async Task DeleteProductAsync(Product product)
         {
            _context.Products.Remove(product);
@@ -67,5 +57,11 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
+        #region IsProductNameDuplicate
+        public async Task<bool> IsProductNameDuplicateAsync(string productName)
+        {
+            return await _context.Products.AnyAsync(p => p.ProductName == productName);
+        }
+        #endregion
     }
 }
