@@ -6,13 +6,17 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Add services
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // Remove properties with null values from JSON responses.
+    .AddJsonOptions(option => 
+    option.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();

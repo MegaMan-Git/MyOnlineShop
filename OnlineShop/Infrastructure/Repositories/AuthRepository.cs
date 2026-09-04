@@ -39,15 +39,16 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Reset password
-        public async Task<bool> ResetPasswordAsync(string token, string email, RestPasswordDto restPassword)
+        public async Task<bool> ResetPasswordAsync(ResetPasswordDto resetPassword)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
             if (user == null)
             {
                 return false;
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, token, restPassword.Password);
+            var result = await _userManager
+                .ResetPasswordAsync(user, resetPassword.ResetToken, resetPassword.Password);
 
             return result.Succeeded;
         }
