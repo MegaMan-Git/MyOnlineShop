@@ -39,18 +39,35 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Reset password
-        public async Task<bool> ResetPasswordAsync(ResetPasswordDto resetPassword)
+        public async Task<Result> ResetPasswordAsync(ResetPasswordDto resetPassword)
         {
-            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
-            if (user == null)
-            {
-                return false;
-            }
+            Result result = new();
 
-            var result = await _userManager
+            var user = await _userManager.FindByEmailAsync(resetPassword.Email);
+            if (user is null)
+            {
+                result.IsSucceeded = false;
+                result.Errors.Add("آدرس ایمیل صحیح نمیباشد.");
+
+                return result;
+            }
+            
+            var identityResult = await _userManager
                 .ResetPasswordAsync(user, resetPassword.ResetToken, resetPassword.Password);
 
-            return result.Succeeded;
+            if(identityResult.Succeeded is false)
+            {
+                result.IsSucceeded = false;
+                foreach (var err in identityResult.Errors)
+                {
+                    result.Errors.Add(err.Description);
+                }
+            
+                    return result;
+            }
+
+            result.IsSucceeded = true;
+            return result;
         }
         #endregion
 
