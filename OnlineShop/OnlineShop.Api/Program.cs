@@ -7,6 +7,8 @@ using Application.Interfaces.UnitOfWork;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
 using System.Text.Json.Serialization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +54,26 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 #endregion
 
+#region JwtConfig
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(option =>
+    {
+        option.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateIssuerSigningKey = true,
+            ValidateAudience = true,
+
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    builder.Configuration["Authentication:SecretKey"]!))
+        };
+    });
+#endregion
+
+
 #endregion
 
 var app = builder.Build();
@@ -67,6 +89,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
