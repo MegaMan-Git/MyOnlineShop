@@ -9,6 +9,7 @@ using Infrastructure.UnitOfWork;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Application.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,13 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     options.Password.RequiredLength = 6;
 }).AddEntityFrameworkStores<OnlineShopContext>()
     .AddDefaultTokenProviders();
+#endregion
+
+#region Add AutoMapper
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<ProfileMapper>();
+});
 #endregion
 
 #region Ioc Container
