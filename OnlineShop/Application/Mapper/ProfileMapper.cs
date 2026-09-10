@@ -1,4 +1,6 @@
-﻿using Application.Dtos.Product;
+﻿using Application.Dtos.Category;
+using Application.Dtos.Product;
+using Application.Entities;
 using AutoMapper;
 using Domain.Entities;
 using System;
@@ -13,10 +15,22 @@ namespace Application.AutoMapper
         {
             //product
             CreateMap<Product,ProductDto>();
-            CreateMap<IEnumerable<Product>,IEnumerable<ProductDto>>();
             CreateMap<ProductDto,Product>();
-            CreateMap<ProductDto,AddProductDto>();
-            CreateMap<ProductDto,UpdateProductDto>();
+            CreateMap<AddProductDto,Product>();
+            CreateMap<UpdateProductDto,Product>();
+
+            //category
+            CreateMap<Category,CategoryDto>()
+                .ForMember(cd => cd.CategoryName,c => c.MapFrom(src => src.Title));
+            
+            CreateMap<CategoryDto,Category>()
+                .ForMember(c => c.Title, cd => cd.MapFrom(src => src.CategoryName));
+
+            CreateMap<AddCategoryDto,Category>()
+                .ForMember(c => c.Title, acd => acd.MapFrom(src => src.CategoryName));
+
+            CreateMap<UpdateCategoryDto, Category>()
+                .ForMember(c => c.Title, ucd => ucd.MapFrom(src => src.NewCategoryName));
         }
     }
 }
