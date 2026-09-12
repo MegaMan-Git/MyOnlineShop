@@ -9,9 +9,11 @@ namespace Application.Interfaces.Repositories
 
         Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync();
         Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync();
-        Task<IEnumerable<CustomerCartItemDto>> GetCartItemsAsync(int cartId);
+        Task<IEnumerable<CustomerCartItemDto>> GetCustomerCartItemsAsync(int cartId);
+        Task<IEnumerable<CartItem?>> GetCartItemsAsync(int cartId);
         Task<Cart?> GetCartAsync(string userId);
         Task<CartItem?> GetCartItemAsync(int cartItemId, int cartId);
+        Task<CustomerCartItemDto?> GetCustomerCartItemDtoAsync(string userId,int cartItemId);
         Task<CartItem?>GetCartItemByProductIdAsync(int cartId,int productId);
        
         Task AddCartAsync(Cart cart);
@@ -19,7 +21,6 @@ namespace Application.Interfaces.Repositories
         
         Task UpdateCartItemAsync(CartItem cartItem);
         
-        Task DeleteCartAsync(Cart cart);
         Task DeleteCartItemAsync(CartItem cartItem);
 
     }

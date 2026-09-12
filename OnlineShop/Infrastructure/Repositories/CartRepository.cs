@@ -55,18 +55,50 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Get Cart&CartItems
+        public async Task<IEnumerable<CartItem?>> GetCartItemsAsync(int cartId)
+        {    
+            return await _context.CartItems
+                .AsNoTracking()
+                .Where(ci => ci.CartId == cartId)
+                .ToListAsync();
+        }
+
         public async Task<Cart?> GetCartAsync(string userId)
         {
             return await _context.Carts
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.UserId == userId);
-        }
+        }  
 
         public async Task<CartItem?> GetCartItemAsync(int cartItemId, int cartId)
         {
             return await _context.CartItems
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.CartId == cartId);
+        }
+
+        public async Task<CustomerCartItemDto?> GetCustomerCartItemDtoAsync(string userId, int cartItemId)
+        {
+
+
+            return await (
+                from cart in _context.Carts
+                join cartitem in _context.CartItems
+                    on cart.Id equals cartitem.CartId
+                join product in _context.Products
+                    on cartitem.ProductId equals product.Id
+                where cartitem.Id == cartItemId && cart.UserId == userId
+                select new CustomerCartItemDto
+                {
+                    Id = cartitem.Id,
+                    CartId = cartitem.CartId,
+                    ProductId = cartitem.ProductId,
+                    ProductName = product.ProductName,
+                    Quantity = cartitem.Quantity,
+                    Price = product.Price,
+                    TotalPrice = product.Price * cartitem.Quantity
+                }
+                ).FirstOrDefaultAsync();
         }
 
         public async Task<CartItem?> GetCartItemByProductIdAsync(int cartId, int productId)
@@ -76,7 +108,7 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId);
         }
 
-        public async Task<IEnumerable<CustomerCartItemDto>> GetCartItemsAsync(int cartId)
+        public async Task<IEnumerable<CustomerCartItemDto>> GetCustomerCartItemsAsync(int cartId)
         {
             return await (
                 from cartitem in _context.CartItems
