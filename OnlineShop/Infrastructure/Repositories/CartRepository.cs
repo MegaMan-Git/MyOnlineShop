@@ -55,7 +55,7 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Get Cart&CartItems
-        public async Task<IEnumerable<CartItem?>> GetCartItemsAsync(int cartId)
+        public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)
         {    
             return await _context.CartItems
                 .AsNoTracking()
