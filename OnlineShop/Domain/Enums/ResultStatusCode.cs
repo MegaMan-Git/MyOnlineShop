@@ -9,6 +9,7 @@ namespace Domain.Enums
         Success,
         BadRequest,
         Unauthorized,
+        Forbidden,
         NotFound,
         Conflict,
         InternalServerError

@@ -107,6 +107,17 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
         }
 
+        public async Task<IEnumerable<Payment>> GetPaymentsAsync(string userId)
+        {
+            var orderIds = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.UserId == userId).Select(o => o.Id).ToListAsync();
+
+            return await _context.Payments
+                .AsNoTracking()
+                .Where(p => orderIds.Contains(p.OrderId)).ToListAsync();
+        }
+
         #endregion
 
         #region Add Order&OrderItem

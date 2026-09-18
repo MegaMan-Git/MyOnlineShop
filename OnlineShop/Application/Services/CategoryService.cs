@@ -98,7 +98,7 @@ namespace Application.Services
             var result = new ServiceResult<CategoryDto>();
 
             var isDuplicated = await _unitOfWork.categoryRepository
-                .IsDuplicateCategoryNameAsync(categoryDto.CategoryName);
+                .IsDuplicateCategoryNameAsync(categoryDto.NewCategoryName);
             if (isDuplicated)
             {
                 result.StatusCode = ResultStatusCode.Conflict;

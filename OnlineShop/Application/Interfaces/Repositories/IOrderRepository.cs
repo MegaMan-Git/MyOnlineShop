@@ -12,7 +12,9 @@ namespace Application.Interfaces.Repositories
         Task<Order?> GetOrderAsync(int orderId, string userId);
         Task<CustomerOrderItemDto?> GetOrderItemAsync(int OrderItemId, int OrderId);
         Task<Payment?> GetPaymentAsync(int orderId);
-        
+        Task<IEnumerable<Payment>> GetPaymentsAsync(string userId);
+
+
         Task AddOrderAsync(Order Order);
         Task AddOrderItemAsync(OrderItem OrderItem);
         Task AddPaymentAsync(int orderId,int totalPrice);
