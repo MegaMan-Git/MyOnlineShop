@@ -6,13 +6,22 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.UnitOfWork;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
+using System.Text.Json.Serialization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Application.AutoMapper;
+using Application.Interfaces.Services;
+using Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Add services
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    // Remove properties with null values from JSON responses.
+    .AddJsonOptions(option =>
+    option.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -39,6 +48,13 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     .AddDefaultTokenProviders();
 #endregion
 
+#region Add AutoMapper
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<ProfileMapper>();
+});
+#endregion
+
 #region Ioc Container
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -46,7 +62,33 @@ builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 #endregion
+
+#region JwtConfig
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer(option =>
+    {
+        option.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateIssuerSigningKey = true,
+            ValidateAudience = true,
+
+            ValidIssuer = builder.Configuration["Authentication:Issuer"],
+            ValidAudience = builder.Configuration["Authentication:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    builder.Configuration["Authentication:SecretKey"]!))
+        };
+    });
+#endregion
+
 
 #endregion
 
@@ -63,6 +105,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

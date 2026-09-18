@@ -14,5 +14,6 @@ namespace Application.Interfaces.Repositories
         Task DeleteProductAsync(Product product);
 
         Task<bool> IsProductNameDuplicateAsync(string productName);
+        Task<bool> IsProductNameDuplicateAsync(string productName,int productId);
     }
 }

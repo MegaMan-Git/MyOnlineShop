@@ -20,7 +20,6 @@ namespace Infrastructure.Repositories
         {
             return await _context.Products
                 .AsNoTracking()
-                .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -28,7 +27,6 @@ namespace Infrastructure.Repositories
         {
             return await _context.Products
                 .AsNoTracking()
-                .Include(p => p.Category)
                 .ToListAsync();
         }
         #endregion
@@ -58,6 +56,10 @@ namespace Infrastructure.Repositories
         public async Task<bool> IsProductNameDuplicateAsync(string productName)
         {
             return await _context.Products.AnyAsync(p => p.ProductName == productName);
+        }
+        public async Task<bool> IsProductNameDuplicateAsync(string productName, int productId)
+        {
+            return await _context.Products.AnyAsync(p => p.ProductName == productName && p.Id != productId);
         }
         #endregion
     }
