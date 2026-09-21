@@ -12,6 +12,6 @@ namespace Application.Interfaces.Services
         Task<ServiceResult<IEnumerable<ProductDto>>> GetAllProductsAsync();
         Task<ServiceResult<ProductDto>> AddProductAsync(AddProductDto productDto);
         Task<ServiceResult<ProductDto>> UpdateProductAsync(UpdateProductDto productDto);
-        Task<bool> DeleteProductAsync(int id);
+        Task<ServiceResult<string>> DeleteProductAsync(int id);
     }
 }

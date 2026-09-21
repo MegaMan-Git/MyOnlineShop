@@ -131,17 +131,24 @@ namespace Application.Services
         #endregion
 
         #region Delete Product
-        public async Task<bool> DeleteProductAsync(int id)
+        public async Task<ServiceResult<string>> DeleteProductAsync(int id)
         {
+            var result = new ServiceResult<string>();
+
             var product = await _unitOfWork.productRepository.GetProductByIdAsync(id);
             if(product is null)
             {
-                return false;
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = "محصول یافت نشد.";
+
+                return result;
             }
             await _unitOfWork.productRepository.DeleteProductAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+            result.StatusCode = ResultStatusCode.Success;
+
+            return result;
         }
         #endregion
     }
