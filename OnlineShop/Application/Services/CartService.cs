@@ -104,7 +104,7 @@ namespace Application.Services
         #endregion
 
         #region Add Cart&CartItem
-        public async Task<ServiceResult<CustomerCartItemDto>> AddCartItemAsync(string userId, AddCartDto cartDto)
+        public async Task<ServiceResult<CustomerCartItemDto>> AddCartItemAsync(string userId, AddCartItemDto cartItemDto)
         {
             var result = new ServiceResult<CustomerCartItemDto>();
 
@@ -120,7 +120,7 @@ namespace Application.Services
             }
 
             //does the requested product already exist?
-            var product = await _unitOfWork.productRepository.GetProductByIdAsync(cartDto.ProductId);
+            var product = await _unitOfWork.productRepository.GetProductByIdAsync(cartItemDto.ProductId);
             if (product is null)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
@@ -135,7 +135,7 @@ namespace Application.Services
             if (existingCartItem is not null)
             {
                 //does the requested quantity of the product exceed the available stock?
-                if (product.Stock < (cartDto.Quantity + existingCartItem.Quantity))
+                if (product.Stock < (cartItemDto.Quantity + existingCartItem.Quantity))
                 {
                     result.StatusCode = ResultStatusCode.BadRequest;
                     result.Message = "موجودی محصول درخواست شده کافی نمیباشد.";
@@ -143,7 +143,7 @@ namespace Application.Services
                     return result;
                 }
 
-                existingCartItem.Quantity += cartDto.Quantity;
+                existingCartItem.Quantity += cartItemDto.Quantity;
 
                 await _unitOfWork.cartRepository.UpdateCartItemAsync(existingCartItem);
                 await _unitOfWork.SaveChangesAsync();
@@ -157,7 +157,7 @@ namespace Application.Services
             else
             {
                 //does the requested quantity of the product exceed the available stock?
-                if (product.Stock < cartDto.Quantity)
+                if (product.Stock < cartItemDto.Quantity)
                 {
                     result.StatusCode = ResultStatusCode.BadRequest;
                     result.Message = "موجودی محصول درخواست شده کافی نمیباشد.";
@@ -170,7 +170,7 @@ namespace Application.Services
                 {
                     CartId = userCart.Id,
                     ProductId = product.Id,
-                    Quantity = cartDto.Quantity,
+                    Quantity = cartItemDto.Quantity,
                 };
                 await _unitOfWork.cartRepository.AddCartItemAsync(cartItem);
                 await _unitOfWork.SaveChangesAsync();
