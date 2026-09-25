@@ -6,12 +6,12 @@ namespace Domain.Enums
 {
     public enum ResultStatusCode
     {
-        Success,
-        BadRequest,
-        Unauthorized,
-        Forbidden,
-        NotFound,
-        Conflict,
-        InternalServerError
+        Success = 200,
+        BadRequest = 400,
+        Unauthorized = 401,
+        Forbidden = 403,
+        NotFound = 404,
+        Conflict = 409,
+        InternalServerError = 500
     }
 }
