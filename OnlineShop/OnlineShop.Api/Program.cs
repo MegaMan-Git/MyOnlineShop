@@ -1,17 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Infrastructure.Persistence.Context;
-using Infrastructure.Identity;
+using Application.AutoMapper;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
+using Application.Services;
+using Infrastructure.Identity;
+using Infrastructure.Persistence.Context;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Infrastructure.UnitOfWork;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Application.AutoMapper;
-using Application.Interfaces.Services;
-using Application.Services;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +24,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     // Remove properties with null values from JSON responses.
-    .AddJsonOptions(option =>
-    option.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+    .AddJsonOptions(options =>
+    {
+        //Ignore null result in response json
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        
+        //Show enum value to string for payment status
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -68,10 +78,17 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<ITokenEncoder, TokenEncoder>();
 #endregion
 
 #region JwtConfig
-builder.Services.AddAuthentication("Bearer")
+builder.Services.AddAuthentication(option =>
+    {
+        option.DefaultAuthenticateScheme = "Bearer";
+        option.DefaultChallengeScheme = "Bearer";
+    })
     .AddJwtBearer(option =>
     {
         option.TokenValidationParameters = new()
