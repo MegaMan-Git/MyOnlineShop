@@ -14,14 +14,15 @@ namespace Application.Interfaces.Services
     {
         Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync();
         Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync();
-        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync(string userId,int OrderId);
-        Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync(string userId,int OrderItemId, int OrderId);
+        Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync(string userId);
+        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync(string userId,int orderId);
+        Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync(string userId,int orderItemId, int orderId);
         Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId);
         Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync(string userId);
 
         Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync
             (string userId, int cartItemId);
-        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrdersFromCartAsync
+        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrderFromCartItemsAsync
             (string userId);
 
         Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync(AdminChangeStatusDto adminChangeStatus);

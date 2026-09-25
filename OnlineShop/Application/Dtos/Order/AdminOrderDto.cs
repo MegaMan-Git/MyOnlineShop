@@ -6,7 +6,7 @@ namespace Application.Dtos.Order
 {
     public class AdminOrderDto
     {
-       public int Id { get; set; }
+       public int OrderId { get; set; }
         public string? UserName {  get; set; } = string.Empty;
     }
 }

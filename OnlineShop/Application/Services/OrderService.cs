@@ -66,6 +66,25 @@ namespace Application.Services
             return result;
         }
 
+        public async Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync(string userId)
+        {
+            var result = new ServiceResult<IEnumerable<CustomerOrderDto>>();
+
+            var customerOrders = await _unitOfWork.orderRepository.GetCustomerOrdersAsync(userId);
+            if (!customerOrders.Any())
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = "در حال حاضر هنوز هیچ سفارشی ثبت نشده است.";
+
+                return result;
+            }
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = customerOrders;
+
+            return result;
+        }
+
         public async Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync
             (string userId,int orderItemId, int orderId)
         {
@@ -255,7 +274,7 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrdersFromCartAsync
+        public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrderFromCartItemsAsync
             (string userId)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderItemDto>>();
