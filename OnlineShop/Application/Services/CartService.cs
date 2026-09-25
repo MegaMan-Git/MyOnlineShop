@@ -76,6 +76,15 @@ namespace Application.Services
                 return result;
             }
 
+            var cartItems = await _unitOfWork.cartRepository.GetCustomerCartItemsAsync(cart.Id);
+            if (!cartItems.Any())
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = "سبد خرید در حال حاضر خالی است.";
+
+                return result;
+            }
+
             result.StatusCode = ResultStatusCode.Success;
             result.Data = await _unitOfWork.cartRepository.GetCustomerCartItemsAsync(cart.Id);
 
