@@ -4,11 +4,13 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Application.Services;
+using FluentValidation;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.UnitOfWork;
+using Application.Validators.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +67,10 @@ builder.Services.AddAutoMapper(cfg =>
 });
 #endregion
 
+#region Add FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
+#endregion
+
 #region Ioc Container
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -81,6 +87,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<ITokenEncoder, TokenEncoder>();
+builder.Services.AddScoped<IValidationService, ValidationService>();
 #endregion
 
 #region JwtConfig

@@ -1,6 +1,9 @@
 ﻿using Application.Dtos.Cart.Cartitem;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Domain.Common;
+using Domain.Enums;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -18,10 +21,14 @@ namespace OnlineShop.Api.Controllers
         #region DI
         private readonly ICartService _cartService;
         private readonly UserManager<ApplicationUser> _userManager;
-        public CartController(ICartService cartService, UserManager<ApplicationUser> userManager)
+        private readonly IValidationService _validationService;
+        public CartController(ICartService cartService,
+            UserManager<ApplicationUser> userManager,
+            IValidationService validationService)
         {
             _cartService = cartService;
             _userManager = userManager;
+            _validationService = validationService;
         }
         #endregion
 
@@ -35,8 +42,34 @@ namespace OnlineShop.Api.Controllers
         }
         #endregion
 
+        #region ValidationMethod
+        private async Task<ServiceResult<TResponse>> ValidateModelAsync<TResponse, TModel>(TModel model)
+        {
+            var result = new ServiceResult<TResponse>();
+
+            var validationResult = await _validationService.ValidateAsync(model);
+
+            if (!validationResult.IsValid)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = "ورودی ارسالی نامعتبر است";
+
+                foreach (var error in validationResult.Errors)
+                {
+                    result.Errors.Add(error.ErrorMessage);
+                }
+
+                return result;
+            }
+
+            result.StatusCode = ResultStatusCode.Success;
+
+            return result;
+        }
+        #endregion
+
         #region Get Admin
-        [HttpGet("admin/cart")]
+        [HttpGet("admin")]
         public async Task<ActionResult> GetAllCartsAsync()
         {
             var result = await _cartService.GetAllCartsForAdminAsync();
@@ -44,7 +77,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpGet("admin/cartItem")]
+        [HttpGet("admin/items")]
         public async Task<ActionResult> GetAllCartItemsAsync()
         {
             var result = await _cartService.GetAllCartItemsForAdminAsync();
@@ -81,7 +114,12 @@ namespace OnlineShop.Api.Controllers
         {
             var userId = await GetUserId();
 
-            var result = await _cartService.AddCartItemAsync(userId, cartItemDto);
+            var result = await ValidateModelAsync<CustomerCartItemDto, AddCartItemDto>(cartItemDto);
+
+            if(result.StatusCode == ResultStatusCode.Success)
+            {
+                result = await _cartService.AddCartItemAsync(userId, cartItemDto);
+            }
 
             return StatusCode((int)result.StatusCode, result);
         }
@@ -93,7 +131,12 @@ namespace OnlineShop.Api.Controllers
         {
             var userId = await GetUserId();
 
-            var result = await _cartService.UpdateCartItemAsync(userId, cartItemDto);
+            var result = await ValidateModelAsync<CustomerCartItemDto, UpdateCartItemDto>(cartItemDto);
+
+            if (result.StatusCode == ResultStatusCode.Success)
+            {
+                result = await _cartService.UpdateCartItemAsync(userId, cartItemDto);
+            }
 
             return StatusCode((int)result.StatusCode, result);
         }
