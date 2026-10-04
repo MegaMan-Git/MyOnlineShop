@@ -20,25 +20,21 @@ namespace OnlineShop.Api.Controllers
     {
         #region DI
         private readonly ICartService _cartService;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IValidationService _validationService;
         public CartController(ICartService cartService,
-            UserManager<ApplicationUser> userManager,
             IValidationService validationService)
         {
             _cartService = cartService;
-            _userManager = userManager;
             _validationService = validationService;
         }
         #endregion
 
         #region Get UserId
-        private async Task<string> GetUserId()
+        private string GetUserId()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email!);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
-            return user!.Id;
+            return userId!;
         }
         #endregion
 
@@ -90,7 +86,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> GetCartItemsAsync()
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _cartService.GetCustomerCartItemsAsync(userId);
 
@@ -100,7 +96,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCartItemAsync(int id)
         {
-            var userId = await GetUserId();
+            var userId =  GetUserId();
 
             var result = await _cartService.GetCustomerCartItemAsync(userId, id);
 
@@ -112,7 +108,7 @@ namespace OnlineShop.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> AddCartItem(AddCartItemDto cartItemDto)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await ValidateModelAsync<CustomerCartItemDto, AddCartItemDto>(cartItemDto);
 
@@ -129,7 +125,7 @@ namespace OnlineShop.Api.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateCartItem(UpdateCartItemDto cartItemDto)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await ValidateModelAsync<CustomerCartItemDto, UpdateCartItemDto>(cartItemDto);
 
@@ -146,7 +142,7 @@ namespace OnlineShop.Api.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeleteCartItemsAsync()
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
             
             var result = await _cartService.ClearCartItemsAsync(userId);
 
@@ -156,7 +152,7 @@ namespace OnlineShop.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCartItemAsync(int id)
         {
-            var userId = await GetUserId(); 
+            var userId = GetUserId(); 
 
             var result = await _cartService.DeleteCartItemAsync(userId, id);
 

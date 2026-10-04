@@ -36,15 +36,16 @@ namespace Application.Services
             //find user
             var result = await _authRepository.SignInAsync(loginDto);
 
-            if (result is false)
+            if (result.IsSucceeded is false)
             {
-                serviceResult.Message = "ایمیل یا رمز عبور صحیح نمیباشد.";
+                serviceResult.Message = ".ایمیل یا رمز عبور صحیح نمیباشد";
+                serviceResult.Errors = result.Errors;
                 serviceResult.StatusCode = ResultStatusCode.Unauthorized;
 
                 return serviceResult;
             }
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email);
+            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email,result.UserId);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto
@@ -73,7 +74,7 @@ namespace Application.Services
                 return serviceResult;
             }
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email);
+            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email,result.UserId);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto { Token = token };

@@ -19,26 +19,22 @@ namespace OnlineShop.Api.Controllers
     {
         #region DI
         private readonly IOrderService _orderService;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IValidationService _validationService;
 
         public OrderController(IOrderService orderService,
-            UserManager<ApplicationUser> userManager,
             IValidationService validationService)
         {
             _orderService = orderService;
-            _userManager = userManager;
             _validationService = validationService;
         }
         #endregion
 
         #region Get UserId
-        private async Task<string> GetUserId()
+        private string GetUserId()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email!);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return user!.Id;
+            return userId!;
         }
         #endregion
 
@@ -89,7 +85,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet]
         public async Task<ActionResult> GetOrdersAsync()
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.GetOrdersAsync(userId);
 
@@ -99,7 +95,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("{orderid}")]
         public async Task<ActionResult> GetOrderItemsAsync(int orderId)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.GetOrderItemsAsync(userId, orderId);
 
@@ -109,7 +105,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("{orderid}/{orderitemid}")]
         public async Task<ActionResult> GetOrderItemAsync(int orderId,int orderItemId)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.GetOrderItemAsync(userId,orderItemId,orderId);
 
@@ -119,7 +115,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("payment")]
         public async Task<ActionResult> GetPaymentsAsync()
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.GetPaymentsAsync(userId);
 
@@ -129,7 +125,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("payment/{orderid}")]
         public async Task<ActionResult> GetPaymentAsync(int orderId)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.GetPaymentAsync(userId, orderId);
 
@@ -141,7 +137,7 @@ namespace OnlineShop.Api.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateOrderFromCartAsync()
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
             
             var result = await _orderService.CreateOrderFromCartItemsAsync(userId);
 
@@ -151,7 +147,7 @@ namespace OnlineShop.Api.Controllers
         [HttpPost("{cartitemid}")]
         public async Task<ActionResult> CreateOrderFromCartItemAsync(int cartItemId)
         {
-            var userId = await GetUserId();
+            var userId = GetUserId();
 
             var result = await _orderService.CreateOrderFromCartItemAsync(userId,cartItemId);
 
