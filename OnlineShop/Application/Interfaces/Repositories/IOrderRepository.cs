@@ -10,6 +10,7 @@ namespace Application.Interfaces.Repositories
         Task<IEnumerable<AdminOrderItemDto>> GetAllOrderItemsForAdminAsync();
         Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync(int OrderId);
         Task<Order?> GetOrderAsync(int orderId, string userId);
+        Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync(string userId);
         Task<CustomerOrderItemDto?> GetOrderItemAsync(int OrderItemId, int OrderId);
         Task<Payment?> GetPaymentAsync(int orderId);
         Task<IEnumerable<Payment>> GetPaymentsAsync(string userId);

@@ -17,7 +17,7 @@ namespace Infrastructure.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email)
+        public string GenerateToken(string email,string userId)
         {
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Authentication:SecretKey"]!));
@@ -27,6 +27,7 @@ namespace Infrastructure.Services
             List<Claim> claim = new();
 
             claim.Add(new Claim(ClaimTypes.Email, email));
+            claim.Add(new Claim(ClaimTypes.NameIdentifier, userId));
 
             var jwtSecurityToken = new JwtSecurityToken(
                 _configuration["Authentication:Issuer"],

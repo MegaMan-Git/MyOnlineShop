@@ -122,18 +122,25 @@ namespace Application.Services
         #endregion
 
         #region Delete Category
-        public async Task<bool> DeleteCategoryAsync(int categoryId)
+        public async Task<ServiceResult<string>> DeleteCategoryAsync(int categoryId)
         {
+            var result = new ServiceResult<string>();
+
             var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync(categoryId);
             if(category is null)
             {
-                return false;
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = "دسته بندی یافت نشد.";
+
+                return result;
             }
 
             await _unitOfWork.categoryRepository.DeleteCategoryAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
-            return true;
+            result.StatusCode = ResultStatusCode.Success;
+
+            return result;
         }
         #endregion
     }

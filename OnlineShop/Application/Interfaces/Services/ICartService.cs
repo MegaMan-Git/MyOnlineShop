@@ -15,7 +15,7 @@ namespace Application.Interfaces.Services
         Task<ServiceResult<IEnumerable<CustomerCartItemDto>>> GetCustomerCartItemsAsync(string userId);
         Task<ServiceResult<CustomerCartItemDto>> GetCustomerCartItemAsync(string userId, int cartItemId);
 
-        Task<ServiceResult<CustomerCartItemDto>> AddCartItemAsync(string userId,AddCartDto cartDto);
+        Task<ServiceResult<CustomerCartItemDto>> AddCartItemAsync(string userId,AddCartItemDto cartItemDto);
 
         Task<ServiceResult<CustomerCartItemDto>> UpdateCartItemAsync(string userId ,UpdateCartItemDto cartItemDto);
     

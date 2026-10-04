@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Domain.Common
 {
-    public class ServiceResult<T> where T : class
+    public class ServiceResult<T>
     {
         public ResultStatusCode StatusCode { get; set; }
         public string? Message { get; set; }

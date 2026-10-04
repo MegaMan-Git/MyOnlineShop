@@ -23,6 +23,9 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             builder
                 .HasIndex(p => p.OrderId)
                 .IsUnique();
+
+            builder
+                .Property(p => p.Status).HasDefaultValue("Waiting");
         }
     }
 }

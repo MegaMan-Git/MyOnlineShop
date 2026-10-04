@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories
                     on order.UserId equals user.Id
                 select new AdminOrderDto
                 {
-                    Id = order.Id,
+                    OrderId = order.Id,
                     UserName = user.UserName
                 }).ToListAsync();
         }
@@ -62,6 +62,26 @@ namespace Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
         }
+
+        public async Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync(string userId)
+        {
+            var orders = await _context.Orders.Where(o => o.UserId == userId).ToListAsync();
+            
+            List<CustomerOrderDto> customerOrders = [];
+            int number = 0;
+
+            foreach (var order in orders)
+            {
+                customerOrders.Add(new CustomerOrderDto
+                {
+                    OrderId = order.Id,
+                    OrderName = $"سفارش شماره {++number}"
+                });
+            }
+
+            return customerOrders;
+        } 
+
         public async Task<CustomerOrderItemDto?> GetOrderItemAsync(int orderId, int orderItemId)
         {
             return await (
