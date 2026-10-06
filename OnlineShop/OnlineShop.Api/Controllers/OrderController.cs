@@ -64,6 +64,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get Admin
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin/order")]
         public async Task<ActionResult> GetAllOrderAsync()
         {
@@ -72,6 +73,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin/orderitem")]
         public async Task<ActionResult> GetAllOrderItemAsync()
         {
@@ -156,6 +158,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        [Authorize(Roles = "Admin")]
         [HttpPut("payment")]
         public async Task<ActionResult> UpdatePaymentAsync(AdminChangeStatusDto adminChangeStatus)
         {

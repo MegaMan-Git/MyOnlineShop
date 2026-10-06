@@ -4,17 +4,15 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Application.Services;
+using Application.Validators.Auth;
 using FluentValidation;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Infrastructure.UnitOfWork;
-using Application.Validators.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -30,7 +28,7 @@ builder.Services.AddControllers()
     {
         //Ignore null result in response json
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        
+
         //Show enum value to string for payment status
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });

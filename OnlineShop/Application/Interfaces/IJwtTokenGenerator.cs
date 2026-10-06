@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,6 @@ namespace Application.Interfaces
 {
     public interface IJwtTokenGenerator
     {
-        public string GenerateToken(string email,string userId);
+        public string GenerateToken(string email, string userId, string role);
     }
 }

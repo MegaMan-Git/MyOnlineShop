@@ -13,6 +13,7 @@ namespace OnlineShop.Api.Controllers
     [Route("api/product")]
     [ApiController]
     [Authorize]
+    [Authorize(Roles = "Admin,Seller")]
     public class ProductController : ControllerBase
     {
         #region DI

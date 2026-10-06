@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.UnitOfWork;
 using Domain.Common;
 using Domain.Enums;
 using System;
@@ -44,8 +45,9 @@ namespace Application.Services
 
                 return serviceResult;
             }
+
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email,result.UserId);
+            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email, result.UserId, result.Role);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto
@@ -67,14 +69,15 @@ namespace Application.Services
 
             if (result.IsSucceeded is false)
             {
+                serviceResult.Message = ".ثبت نام انجام نشد";
                 serviceResult.Errors = result.Errors;
-                serviceResult.Message = "ثبت نام انجام نشد.";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
 
                 return serviceResult;
             }
+
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email,result.UserId);
+            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email, result.UserId, result.Role);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto { Token = token };
@@ -129,13 +132,55 @@ namespace Application.Services
             {
                 serviceResult.Message = "تغییر رمز عبور انجام نشد.";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
-                serviceResult.Errors = result.Errors;
+                serviceResult.Errors = serviceResult.Errors;
             
                 return serviceResult;
             }
 
             serviceResult.Message = "رمز عبور با موفقیت تغییر کرد.";
             serviceResult.StatusCode = ResultStatusCode.Success;
+
+            return serviceResult;
+        }
+        #endregion
+
+        #region GetUserRoles
+        public async Task<ServiceResult<IEnumerable<UserRolesDto>>> GetUserRolesAsync()
+        {
+            var result = new ServiceResult<IEnumerable<UserRolesDto>>();
+
+            var userRoles = await _authRepository.GetUserRolesAsync();
+            if (!userRoles.Any())
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".هیچ رولی یافت نشد";
+
+                return result;
+            }
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = userRoles;
+
+            return result;
+        }
+        #endregion
+
+        #region ChangeUserRole
+        public async Task<ServiceResult<string>> ChangeUserRoleAsync(RoleChangeDto roleChange)
+        {
+            var serviceResult = new ServiceResult<string>();
+
+            var result = await _authRepository.ChangeUserRoleAsync(roleChange);
+
+            if (!result.IsSucceeded)
+            {
+                serviceResult.Message = result.Errors.FirstOrDefault();
+                serviceResult.StatusCode = ResultStatusCode.NotFound;
+                return serviceResult;
+            }
+
+            serviceResult.StatusCode = ResultStatusCode.Success;
+            serviceResult.Message = ".نقش کاربر با موفقیت تغییر کرد";
 
             return serviceResult;
         }

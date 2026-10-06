@@ -11,7 +11,7 @@ namespace OnlineShop.Api.Controllers
 {
     [Route("api/category")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class CategoryController : ControllerBase
     {
         #region DI

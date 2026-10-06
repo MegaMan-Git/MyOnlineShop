@@ -65,6 +65,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get Admin
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
         public async Task<ActionResult> GetAllCartsAsync()
         {
@@ -73,6 +74,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin/items")]
         public async Task<ActionResult> GetAllCartItemsAsync()
         {

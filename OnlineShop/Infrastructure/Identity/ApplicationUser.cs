@@ -10,10 +10,10 @@ namespace Infrastructure.Identity
     {
         public ApplicationUser()
         {
-            orders = new List<Order>();
+            Orders = new List<Order>();
         }
 
         public Cart? Cart { get; set; }
-        public ICollection<Order> orders {  get; set; }
+        public ICollection<Order> Orders {  get; set; }
     }
 }
