@@ -97,18 +97,29 @@ namespace Application.Services
         {
             var result = new ServiceResult<CategoryDto>();
 
+            //is category exist?
+            var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync(categoryDto.Id);
+            if(category is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".دسته بندی مورد نظر یافت نشد";
+
+                return result;
+            }
+
+            //is category duplicate
             var isDuplicated = await _unitOfWork.categoryRepository
                 .IsDuplicateCategoryNameAsync(categoryDto.NewCategoryName);
             if (isDuplicated)
             {
                 result.StatusCode = ResultStatusCode.Conflict;
-                result.Message = "نام دسته بندی تکراری است.";
+                result.Message = ".نام دسته بندی تکراری است";
 
                 return result;
             }
 
             //map
-            var category = _mapper.Map<Category>(categoryDto);
+            _mapper.Map(categoryDto, category);
 
             //add and savechanges
             await _unitOfWork.categoryRepository.UpdateCategoryAsync(category);

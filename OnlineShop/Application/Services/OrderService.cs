@@ -207,7 +207,7 @@ namespace Application.Services
             if(cart is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "سبد خرید یافت نشد.";
+                result.Message = ".سبد خرید یافت نشد";
 
                 return result;
             }
@@ -215,7 +215,7 @@ namespace Application.Services
             if(cartItem is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "آیتمی با شناسه ارسالی برای شما یافت نشد.";
+                result.Message = ".آیتمی با شناسه ارسالی برای شما یافت نشد";
 
                 return result;
             }
@@ -226,50 +226,55 @@ namespace Application.Services
             if(product is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "محصول از قبل انتخاب شده دیگر در فروشگاه وجود ندارد.";
+                result.Message = ".محصول از قبل انتخاب شده دیگر در فروشگاه وجود ندارد";
 
                 return result;
             }
             if(product.Stock < cartItem.Quantity)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "تعداد سفارش درخواستی بیشتر از موجودی فعلی انبار میباشد! لطفا سفارش خود را اصلاح کنید";
+                result.Message = ".تعداد سفارش درخواستی بیشتر از موجودی فعلی انبار میباشد! لطفا سفارش خود را اصلاح کنید";
 
                 return result;
             }
+
             //change product stock
             product.Stock -= cartItem.Quantity;
             await _unitOfWork.productRepository.UpdateProductAsync(product);
 
             
-            //add new order record in database
-            var newOrder = new Order { UserId = userId };
-            await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
-            await _unitOfWork.SaveChangesAsync();
-            
-            //add orderitem and payment
-            var orderItem = new OrderItem
+            //add new order
+            var newOrder = new Order 
             {
-                OrderId = newOrder.Id,
+                UserId = userId 
+            };
+
+            //add orderitem
+            newOrder.orderItems.Add(new OrderItem
+            {
                 ProductId = product.Id,
                 Quantity = cartItem.Quantity,
                 UnitPrice = product.Price
-            };
-            await _unitOfWork.orderRepository.AddOrderItemAsync(orderItem);
-            await _unitOfWork.orderRepository.AddPaymentAsync(newOrder.Id, product.Price * cartItem.Quantity);
+            });
 
-            
+            //add payment
+            newOrder.Payment = new Payment
+            {
+                Amount = product.Price * cartItem.Quantity
+            };
+ 
             //delete cartitem
             await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
-            
+
+            //add order & orderitem & payment
+            await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
 
             //savechanges
             await _unitOfWork.SaveChangesAsync();
 
-
             //return status
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(orderItem.Id,newOrder.Id);
+            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(newOrder.orderItems.Single().Id,newOrder.Id);
 
             return result;
         }
@@ -278,7 +283,7 @@ namespace Application.Services
             (string userId)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderItemDto>>();
-            List<Product> products = new();
+            var products = new Dictionary<int, Product>();
             int totalPrice = 0;
 
             //get cart and cartitem dtos
@@ -286,7 +291,7 @@ namespace Application.Services
             if (cart is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "سبد خرید یافت نشد.";
+                result.Message = ".سبد خرید یافت نشد";
 
                 return result;
             }
@@ -294,7 +299,7 @@ namespace Application.Services
             if (!cartItemDtos.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "هیچ محصولی در سبد خرید شما وجود ندارد.";
+                result.Message = ".هیچ محصولی در سبد خرید شما وجود ندارد";
 
                 return result;
             }
@@ -309,17 +314,17 @@ namespace Application.Services
                 {
                     result.StatusCode = ResultStatusCode.BadRequest;
                     result.Errors.Add(
-                        $"محصول از قبل انتخاب شده {item.ProductName} دیگر در فروشگاه وجود ندارد.");
+                        $"محصول از قبل انتخاب شده {item.ProductName} .دیگر در فروشگاه وجود ندارد");
                     continue;
                 }
 
-                products.Add(product);
+                products.Add(product.Id, product);
 
                 if (product.Stock < item.Quantity)
                 {
                     result.StatusCode = ResultStatusCode.BadRequest;
                     result.Errors.Add(
-                        $"تعداد سفارش درخواستی محصول {item.ProductName} بیشتر از موجودی انبار است");
+                        $"تعداد سفارش درخواستی محصول {item.ProductName} .بیشتر از موجودی انبار است");
                 }
             }
             //if there are problems exist
@@ -332,34 +337,36 @@ namespace Application.Services
 
             
             //add new order record in database
-            var newOrder = new Order { UserId = userId };
-            await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
-            await _unitOfWork.SaveChangesAsync();
+            var newOrder = new Order 
+            { 
+                UserId = userId 
+            };
 
-
-            var cartItemListDtos = cartItemDtos.ToList();
-            for (int i = 0; i < cartItemListDtos.Count;i++)
+            
+            foreach(var item in cartItemDtos)
             {
-                var item = cartItemListDtos[i];
-                var product = products[i];
+                var product = products[item.ProductId];
 
                 //change product stock
                 product.Stock -= item.Quantity;
                 await _unitOfWork.productRepository.UpdateProductAsync(product);
 
                 //add orderitem
-                await _unitOfWork.orderRepository.AddOrderItemAsync(new OrderItem
+                newOrder.orderItems.Add(new OrderItem
                 {
-                    OrderId = newOrder.Id,
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    UnitPrice = product!.Price
+                    UnitPrice = product.Price
                 });
                 
                 totalPrice += product.Price * item.Quantity;
             }
+
             //add payment
-            await _unitOfWork.orderRepository.AddPaymentAsync(newOrder.Id, totalPrice);
+            newOrder.Payment = new Payment
+            {
+                Amount = totalPrice
+            };
             
             //delete cartitems
             var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
@@ -367,6 +374,9 @@ namespace Application.Services
             {
                 await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
             }
+
+            //add order & orderitems & payment
+            await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
 
             //savechanges
             await _unitOfWork.SaveChangesAsync();
@@ -393,8 +403,10 @@ namespace Application.Services
 
                 return result;
             }
+
             //change status
-            payment.Status = adminChangeStatus.Status.ToString();
+            var status = Enum.Parse<PaymentStatus>(adminChangeStatus.Status, true);
+            payment.Status = status.ToString();
 
             await _unitOfWork.orderRepository.UpdatePaymentStatusAsync(payment);
             await _unitOfWork.SaveChangesAsync();

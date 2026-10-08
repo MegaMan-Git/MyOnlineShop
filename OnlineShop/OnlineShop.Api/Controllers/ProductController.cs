@@ -12,8 +12,6 @@ namespace OnlineShop.Api.Controllers
 {
     [Route("api/product")]
     [ApiController]
-    [Authorize]
-    [Authorize(Roles = "Admin,Seller")]
     public class ProductController : ControllerBase
     {
         #region DI
@@ -52,7 +50,8 @@ namespace OnlineShop.Api.Controllers
         }
         #endregion
 
-        #region Get       
+        #region Get
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
         public async Task<ActionResult> GetAllProductsAsync()
         {
@@ -61,6 +60,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetProductByIdAsync(int id)
         {
@@ -72,6 +72,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<ActionResult> AddProductAsync(AddProductDto product)
         {
@@ -87,6 +88,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPut]
         public async Task<ActionResult> UpdateProductAsync(UpdateProductDto product)
         {
@@ -102,6 +104,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProductAsync(int id)
         {

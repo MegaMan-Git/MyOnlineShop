@@ -132,7 +132,7 @@ namespace Application.Services
             {
                 serviceResult.Message = "تغییر رمز عبور انجام نشد.";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
-                serviceResult.Errors = serviceResult.Errors;
+                serviceResult.Errors = result.Errors;
             
                 return serviceResult;
             }

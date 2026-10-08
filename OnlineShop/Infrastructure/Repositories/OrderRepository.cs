@@ -146,24 +146,24 @@ namespace Infrastructure.Repositories
             await _context.Orders.AddAsync(order);
         }
 
-        public async Task AddOrderItemAsync(OrderItem orderItem)
-        {
-            await _context.OrderItems.AddAsync(orderItem);
-            await _context.SaveChangesAsync();
-        }
+        //public async Task AddOrderItemAsync(OrderItem orderItem)
+        //{
+        //    await _context.OrderItems.AddAsync(orderItem);
+        //    await _context.SaveChangesAsync();
+        //}
         #endregion
 
-        #region Add Payment
-        public async Task AddPaymentAsync(int orderId, int totalPrice)
-        {
-            await _context.Payments.AddAsync(new Payment
-            {
-                Amount = totalPrice,
-                OrderId = orderId,
-                CreatedAt = DateTime.UtcNow,
-            });
-        }
-        #endregion
+        //#region Add Payment
+        //public async Task AddPaymentAsync(int orderId, int totalPrice)
+        //{
+        //    await _context.Payments.AddAsync(new Payment
+        //    {
+        //        Amount = totalPrice,
+        //        OrderId = orderId,
+        //        CreatedAt = DateTime.UtcNow,
+        //    });
+        //}
+        //#endregion
 
         #region Update PaymentStatus
         public async Task UpdatePaymentStatusAsync(Payment payment)

@@ -13,7 +13,7 @@ public class Payment
 
     public string Status { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     
     public Order? Order { get; set; }

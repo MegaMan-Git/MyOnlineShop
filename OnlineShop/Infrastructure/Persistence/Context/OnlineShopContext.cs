@@ -73,7 +73,7 @@ public partial class OnlineShopContext : IdentityDbContext<ApplicationUser, Appl
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
-                .HasDefaultValue("Wating");
+                .HasDefaultValue("Waiting");
         });
 
         modelBuilder.Entity<Product>(entity =>

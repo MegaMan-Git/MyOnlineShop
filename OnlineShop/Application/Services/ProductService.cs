@@ -73,13 +73,23 @@ namespace Application.Services
         {
             var result = new ServiceResult<ProductDto>();
 
+            //is category exist?
+            var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync((int)productDto.CategoryId!);
+            if (category is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".دسته بندی مورد نظر یافت نشد";
+
+                return result;
+            }
+
             // is productname before exist?
             var isDuplicate = await _unitOfWork.productRepository
                 .IsProductNameDuplicateAsync(productDto.ProductName);
             if (isDuplicate)
             {
                 result.StatusCode = ResultStatusCode.Conflict;
-                result.Message = "محصول دیگری با این نام قبلا ثبت شده است.";
+                result.Message = ".محصول دیگری با این نام قبلا ثبت شده است";
 
                 return result;
             }
@@ -92,7 +102,7 @@ namespace Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Message = "محصول اضافه شد.";
+            result.Message = ".محصول اضافه شد";
             result.Data = _mapper.Map<ProductDto>(product);
 
             return result;
@@ -104,26 +114,46 @@ namespace Application.Services
         {
             var result = new ServiceResult<ProductDto>();
 
-            // is productname before exist?
+            //is product exist?
+            var product = await _unitOfWork.productRepository.GetProductByIdAsync(productDto.Id);
+            if(product is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".محصول مورد نظر یافت نشد";
+
+                return result;
+            }
+
+            //is category exist?
+            var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync((int)productDto.CategoryId!);
+            if (category is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".دسته بندی مورد نظر یافت نشد";
+
+                return result;
+            }
+
+            //is productname before exist?
             var isDuplicate = await _unitOfWork.productRepository
                 .IsProductNameDuplicateAsync(productDto.ProductName,productDto.Id);
             if (isDuplicate)
             {
                 result.StatusCode = ResultStatusCode.Conflict;
-                result.Message = "محصول دیگری با این نام قبلا ثبت شده است.";
+                result.Message = ".محصول دیگری با این نام قبلا ثبت شده است";
 
                 return result;
             }
 
             //map
-            var product = _mapper.Map<Product>(productDto);
+            _mapper.Map(productDto, product);
 
-            //add and savechanges
+            //update and savechanges
             await _unitOfWork.productRepository.UpdateProductAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Message = "محصول بروزرسانی شد.";
+            result.Message = ".محصول بروزرسانی شد";
             result.Data = _mapper.Map<ProductDto>(product);
 
             return result;

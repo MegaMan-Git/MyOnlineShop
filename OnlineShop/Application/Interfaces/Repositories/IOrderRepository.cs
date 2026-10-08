@@ -17,8 +17,8 @@ namespace Application.Interfaces.Repositories
 
 
         Task AddOrderAsync(Order Order);
-        Task AddOrderItemAsync(OrderItem OrderItem);
-        Task AddPaymentAsync(int orderId,int totalPrice);
+        //Task AddOrderItemAsync(OrderItem OrderItem);
+        //Task AddPaymentAsync(int orderId,int totalPrice);
         
         Task UpdatePaymentStatusAsync(Payment payment);
 

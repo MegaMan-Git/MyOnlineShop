@@ -11,7 +11,6 @@ namespace OnlineShop.Api.Controllers
 {
     [Route("api/category")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
     public class CategoryController : ControllerBase
     {
         #region DI
@@ -51,6 +50,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
         public async Task<ActionResult> GetAllCategoryAsync()
         {
@@ -59,6 +59,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCategoryByIdAsync(int id)
         {
@@ -69,6 +70,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> AddCategoryAsync(AddCategoryDto category)
         {
@@ -84,6 +86,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult> UpdateCategoryAsync(UpdateCategoryDto category)
         {
@@ -99,6 +102,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategoryAsync(int id)
         {
