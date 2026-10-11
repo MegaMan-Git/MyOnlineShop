@@ -42,6 +42,7 @@ namespace Infrastructure.Repositories
                     on cartitem.ProductId equals product.Id
                 join user in _context.Users
                     on cart.UserId equals user.Id
+                where product.IsDeleted == false
                 select new AdminCartItemDto
                 {
                     Id = cartitem.Id,
@@ -59,7 +60,16 @@ namespace Infrastructure.Repositories
         {    
             return await _context.CartItems
                 .AsNoTracking()
+                .Include(p => p.Product)
                 .Where(ci => ci.CartId == cartId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<CartItem>> GetCartItemsByProductIdAsync(int productId)
+        {
+            return await _context.CartItems
+                .AsNoTracking()
+                .Where(ci => ci.ProductId == productId)
                 .ToListAsync();
         }
 
@@ -74,6 +84,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.CartItems
                 .AsNoTracking()
+                .Include(p => p.Product)
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.CartId == cartId);
         }
 

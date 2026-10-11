@@ -106,7 +106,7 @@ namespace OnlineShop.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategoryAsync(int id)
         {
-            var result = await _categoryService.DeleteCategoryAsync(id);
+            var result = await _categoryService.SoftDeleteCategoryAsync(id);
 
             return StatusCode((int)result.StatusCode, result);
         }

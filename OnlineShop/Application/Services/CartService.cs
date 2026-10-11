@@ -32,7 +32,7 @@ namespace Application.Services
             if (!carts.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "در حال حاضر هیچ سبد خریدی توسط مشتریان ثبت نشده.";
+                result.Message = ".در حال حاضر هیچ سبد خریدی توسط مشتریان ثبت نشده";
 
                 return result;
             }
@@ -51,7 +51,7 @@ namespace Application.Services
             if (!carItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "در حال حاضر هیچ سبد خریدی توسط مشتریان ثبت نشده.";
+                result.Message = ".در حال حاضر هیچ سبد خریدی توسط مشتریان ثبت نشده";
 
                 return result;
             }
@@ -71,7 +71,7 @@ namespace Application.Services
             if (cart is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "سبد خرید در حال حاضر خالی است.";
+                result.Message = ".سبد خرید در حال حاضر خالی است";
 
                 return result;
             }
@@ -80,7 +80,7 @@ namespace Application.Services
             if (!cartItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "سبد خرید در حال حاضر خالی است.";
+                result.Message = ".سبد خرید در حال حاضر خالی است";
 
                 return result;
             }
@@ -100,7 +100,7 @@ namespace Application.Services
             if (cartItem is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "محصولی با این مشخصات در سبد خرید یافت نشد.";
+                result.Message = ".محصولی با این مشخصات در سبد خرید یافت نشد";
 
                 return result;
             }
@@ -117,6 +117,16 @@ namespace Application.Services
         {
             var result = new ServiceResult<CustomerCartItemDto>();
 
+            //does the requested product already exist?
+            var product = await _unitOfWork.productRepository.GetProductByIdAsync(cartItemDto.ProductId);
+            if (product is null)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".محصولی با آیدی خواسته شده وجود ندارد";
+
+                return result;
+            }
+
             //does the user already have a shopping cart?
             var userCart = await _unitOfWork.cartRepository.GetCartAsync(userId);
 
@@ -128,16 +138,6 @@ namespace Application.Services
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            //does the requested product already exist?
-            var product = await _unitOfWork.productRepository.GetProductByIdAsync(cartItemDto.ProductId);
-            if (product is null)
-            {
-                result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "محصولی با آیدی خواسته شده وجود ندارد.";
-
-                return result;
-            }
-
             //is the product already in the shopping cart?
             var existingCartItem = await _unitOfWork.cartRepository
                 .GetCartItemByProductIdAsync(userCart.Id, product.Id);
@@ -147,7 +147,7 @@ namespace Application.Services
                 if (product.Stock < (cartItemDto.Quantity + existingCartItem.Quantity))
                 {
                     result.StatusCode = ResultStatusCode.BadRequest;
-                    result.Message = "موجودی محصول درخواست شده کافی نمیباشد.";
+                    result.Message = ".موجودی محصول درخواست شده کافی نمیباشد";
 
                     return result;
                 }
@@ -163,32 +163,31 @@ namespace Application.Services
 
                 return result;
             }
-            else
+
+            //does the requested quantity of the product exceed the available stock?
+            if (product.Stock < cartItemDto.Quantity)
             {
-                //does the requested quantity of the product exceed the available stock?
-                if (product.Stock < cartItemDto.Quantity)
-                {
-                    result.StatusCode = ResultStatusCode.BadRequest;
-                    result.Message = "موجودی محصول درخواست شده کافی نمیباشد.";
-
-                    return result;
-                }
-
-                //add new cartitem
-                var cartItem = new CartItem
-                {
-                    CartId = userCart.Id,
-                    ProductId = product.Id,
-                    Quantity = cartItemDto.Quantity,
-                };
-                await _unitOfWork.cartRepository.AddCartItemAsync(cartItem);
-                await _unitOfWork.SaveChangesAsync();
-
-                result.StatusCode = ResultStatusCode.Success;
-                result.Data = await _unitOfWork.cartRepository.GetCustomerCartItemDtoAsync(userId, cartItem.Id);
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".موجودی محصول درخواست شده کافی نمیباشد";
 
                 return result;
             }
+
+            //add new cartitem
+            var cartItem = new CartItem
+            {
+                CartId = userCart.Id,
+                ProductId = product.Id,
+                Quantity = cartItemDto.Quantity,
+            };
+            await _unitOfWork.cartRepository.AddCartItemAsync(cartItem);
+            await _unitOfWork.SaveChangesAsync();
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = await _unitOfWork.cartRepository.GetCustomerCartItemDtoAsync(userId, cartItem.Id);
+
+            return result;
+
         }
         #endregion
 
@@ -261,7 +260,7 @@ namespace Application.Services
             if (cart is null)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "سبد خریدی هنوز ساخته نشده.";
+                result.Message = ".سبد خریدی هنوز ساخته نشده";
 
                 return result;
             }
@@ -271,7 +270,7 @@ namespace Application.Services
             if (cartItem is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "محصولی با این مشخصات در سبد خرید یافت نشد.";
+                result.Message = ".محصولی با این مشخصات در سبد خرید یافت نشد";
 
                 return result;
             }
@@ -295,21 +294,21 @@ namespace Application.Services
             if (cart is null)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "سبد خریدی هنوز ساخته نشده.";
+                result.Message = ".سبد خریدی هنوز ساخته نشده";
 
                 return result;
             }
 
             //find cartitems
             var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
-            
+
             //delete cartitems
             foreach (var cartItem in cartItems)
             {
                 await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
             }
-            await _unitOfWork.SaveChangesAsync();
 
+            await _unitOfWork.SaveChangesAsync();
 
             result.StatusCode = ResultStatusCode.Success;
 

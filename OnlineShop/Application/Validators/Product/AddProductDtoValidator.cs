@@ -10,8 +10,9 @@ namespace Application.Validators.Product
     {
         public AddProductDtoValidator()
         {
-            RuleFor(p => p.ProductName)
-                .NotEmpty().WithMessage(".نام محصول وارد نشده است");
+            RuleFor(p => p.ProductName).Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage(".نام محصول وارد نشده است")
+                .MaximumLength(100).WithMessage(".نام محصول نمیتواند بیشتر از 100 کاراکتر باشد");
 
             RuleFor(p => p.Price).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".قیمت محصول وارد نشده است")

@@ -32,7 +32,7 @@ namespace Application.Services
             if(!categories.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "هیچ دسته بندی در حال حاضر ثبت نشده.";
+                result.Message = ".هیچ دسته بندی در حال حاضر ثبت نشده";
 
                 return result;
             }
@@ -51,7 +51,7 @@ namespace Application.Services
             if(category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "دسته بندی مورد نظر یافت نشد.";
+                result.Message = ".دسته بندی مورد نظر یافت نشد";
 
                 return result;
             }
@@ -73,7 +73,7 @@ namespace Application.Services
             if (isDuplicated)
             {
                 result.StatusCode = ResultStatusCode.Conflict;
-                result.Message = "این دسته بندی از قبل وجود دارد.";
+                result.Message = ".این دسته بندی از قبل وجود دارد";
 
                 return result;
             }
@@ -107,9 +107,18 @@ namespace Application.Services
                 return result;
             }
 
+            //is default category?
+            if(category.Id == -1)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".نمیتوان نام دسته بندی پیشفرض را عوض کرد";
+
+                return result;
+            }
+            
             //is category duplicate
             var isDuplicated = await _unitOfWork.categoryRepository
-                .IsDuplicateCategoryNameAsync(categoryDto.NewCategoryName);
+                .IsDuplicateCategoryNameAsync(categoryDto.NewCategoryName, categoryDto.Id);
             if (isDuplicated)
             {
                 result.StatusCode = ResultStatusCode.Conflict;
@@ -133,7 +142,7 @@ namespace Application.Services
         #endregion
 
         #region Delete Category
-        public async Task<ServiceResult<string>> DeleteCategoryAsync(int categoryId)
+        public async Task<ServiceResult<string>> SoftDeleteCategoryAsync(int categoryId)
         {
             var result = new ServiceResult<string>();
 
@@ -141,12 +150,30 @@ namespace Application.Services
             if(category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "دسته بندی یافت نشد.";
+                result.Message = ".دسته بندی یافت نشد";
 
                 return result;
             }
 
-            await _unitOfWork.categoryRepository.DeleteCategoryAsync(category);
+            //you can not delete default category!
+            if(category.Id == -1)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".امکان حذف برای این دسته بندی وجود ندارد";
+
+                return result;
+            }
+
+            //change category product to default category after delete category
+            var products = await _unitOfWork.productRepository.GetProductsByCategoryId(categoryId);            
+            foreach(var product in products)
+            {
+                product.CategoryId = -1;
+            }
+
+            //Delete
+            category.IsDeleted = true;
+            await _unitOfWork.categoryRepository.UpdateCategoryAsync(category);
             await _unitOfWork.SaveChangesAsync();
 
             result.StatusCode = ResultStatusCode.Success;

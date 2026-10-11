@@ -15,19 +15,19 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             //  Product N <--> 1 Category
             builder
                  .HasOne(p => p.Category)
-                 .WithMany(c => c.products)
+                 .WithMany(c => c.Products)
                  .HasForeignKey(p => p.CategoryId)
                  .OnDelete(DeleteBehavior.Restrict);
         
             // Product 1 <--> N CartItem
             builder
-                .HasMany(p => p.cartItems)
+                .HasMany(p => p.CartItems)
                 .WithOne(ci => ci.Product)
                 .HasForeignKey(ci => ci.ProductId);
 
             // Product 1 <--> N OrderItem
             builder
-                .HasMany(p => p.orderItems)
+                .HasMany(p => p.OrderItems)
                 .WithOne(oi => oi.Product)
                 .HasForeignKey(oi => oi.ProductId);
         }

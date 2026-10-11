@@ -16,6 +16,6 @@ namespace Application.Interfaces.Services
 
         Task<ServiceResult<CategoryDto>> UpdateCategoryAsync(UpdateCategoryDto categoryDto);
 
-        Task<ServiceResult<string>> DeleteCategoryAsync(int categoryId);
+        Task<ServiceResult<string>> SoftDeleteCategoryAsync(int categoryId);
     }
 }

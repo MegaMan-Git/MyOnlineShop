@@ -27,7 +27,7 @@ namespace Application.Services
         }
         #endregion
 
-        #region Get Order&OrderItem
+        #region Get Order&OrderItem For Admin
         public async Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync()
         {
             var result = new ServiceResult<IEnumerable<AdminOrderDto>>();
@@ -36,7 +36,7 @@ namespace Application.Services
             if(!orders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "هیچ سفارشی در حال حاضر ثبت نشده.";
+                result.Message = ".هیچ سفارشی در حال حاضر ثبت نشده است";
 
                 return result;
             }
@@ -55,7 +55,7 @@ namespace Application.Services
             if(!orderItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "هیچ سفارشی در حال حاضر ثبت نشده.";
+                result.Message = ".هیچ سفارشی در حال حاضر ثبت نشده است";
 
                 return result;
             }
@@ -65,7 +65,9 @@ namespace Application.Services
 
             return result;
         }
+        #endregion
 
+        #region Get Order&OrderItem
         public async Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync(string userId)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderDto>>();
@@ -74,7 +76,7 @@ namespace Application.Services
             if (!customerOrders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "در حال حاضر هنوز هیچ سفارشی ثبت نشده است.";
+                result.Message = ".در حال حاضر هنوز هیچ سفارشی ثبت نشده است";
 
                 return result;
             }
@@ -250,7 +252,7 @@ namespace Application.Services
             };
 
             //add orderitem
-            newOrder.orderItems.Add(new OrderItem
+            newOrder.OrderItems.Add(new OrderItem
             {
                 ProductId = product.Id,
                 Quantity = cartItem.Quantity,
@@ -274,7 +276,7 @@ namespace Application.Services
 
             //return status
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(newOrder.orderItems.Single().Id,newOrder.Id);
+            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(newOrder.OrderItems.Single().Id,newOrder.Id);
 
             return result;
         }
@@ -352,7 +354,7 @@ namespace Application.Services
                 await _unitOfWork.productRepository.UpdateProductAsync(product);
 
                 //add orderitem
-                newOrder.orderItems.Add(new OrderItem
+                newOrder.OrderItems.Add(new OrderItem
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,

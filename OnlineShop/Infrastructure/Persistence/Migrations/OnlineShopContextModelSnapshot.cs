@@ -31,6 +31,9 @@ namespace Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -43,6 +46,14 @@ namespace Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            IsDeleted = false,
+                            Title = "No Category"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
@@ -196,6 +207,9 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
@@ -487,7 +501,7 @@ namespace Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("cartItems")
+                        .WithMany("CartItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -509,13 +523,13 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.OrderItem", b =>
                 {
                     b.HasOne("Domain.Entities.Order", "Order")
-                        .WithMany("orderItems")
+                        .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Product", "Product")
-                        .WithMany("orderItems")
+                        .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -539,7 +553,7 @@ namespace Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.HasOne("Application.Entities.Category", "Category")
-                        .WithMany("products")
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict);
 
@@ -599,7 +613,7 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Application.Entities.Category", b =>
                 {
-                    b.Navigation("products");
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("Domain.Entities.Cart", b =>
@@ -609,16 +623,16 @@ namespace Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Order", b =>
                 {
-                    b.Navigation("Payment");
+                    b.Navigation("OrderItems");
 
-                    b.Navigation("orderItems");
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
-                    b.Navigation("cartItems");
+                    b.Navigation("CartItems");
 
-                    b.Navigation("orderItems");
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Infrastructure.Identity.ApplicationUser", b =>

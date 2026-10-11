@@ -55,52 +55,7 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Get Order&OrderItems&Payment
-        public async Task<Order?> GetOrderAsync(int orderId, string userId)
-        {
-            return await _context.Orders
-                .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
-        }
-
-        public async Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync(string userId)
-        {
-            var orders = await _context.Orders.Where(o => o.UserId == userId).ToListAsync();
-            
-            List<CustomerOrderDto> customerOrders = [];
-            int number = 0;
-
-            foreach (var order in orders)
-            {
-                customerOrders.Add(new CustomerOrderDto
-                {
-                    OrderId = order.Id,
-                    OrderName = $"سفارش شماره {++number}"
-                });
-            }
-
-            return customerOrders;
-        } 
-
-        public async Task<CustomerOrderItemDto?> GetOrderItemAsync(int orderId, int orderItemId)
-        {
-            return await (
-                from orderitem in _context.OrderItems
-                join product in _context.Products
-                    on orderitem.ProductId equals product.Id
-                where orderitem.OrderId == orderId && orderitem.Id == orderItemId
-                select new CustomerOrderItemDto
-                {
-                    Id = orderitem.Id,
-                    OrderId = orderitem.OrderId,
-                    ProductId = product.Id,
-                    ProductName = product.ProductName,
-                    Price = orderitem.UnitPrice,
-                    TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
-                    Quantity = orderitem.Quantity
-                }).FirstOrDefaultAsync();
-        }
-
+        #region Get Order&OrderItems&Payment 
         public async Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync(int orderId)
         {
             return await (
@@ -120,11 +75,27 @@ namespace Infrastructure.Repositories
                 }).ToListAsync();
         }
 
-        public async Task<Payment?> GetPaymentAsync(int orderId)
+        public async Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync(string userId)
         {
-            return await _context.Payments
+            var orders = await _context.Orders
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.OrderId == orderId);
+                .Where(o => o.UserId == userId)
+                .OrderBy(o => o.Id)
+                .ToListAsync();
+            
+            List<CustomerOrderDto> customerOrders = [];
+            int number = 0;
+
+            foreach (var order in orders)
+            {
+                customerOrders.Add(new CustomerOrderDto
+                {
+                    OrderId = order.Id,
+                    OrderName = $"سفارش شماره {++number}"
+                });
+            }
+
+            return customerOrders;
         }
 
         public async Task<IEnumerable<Payment>> GetPaymentsAsync(string userId)
@@ -138,32 +109,46 @@ namespace Infrastructure.Repositories
                 .Where(p => orderIds.Contains(p.OrderId)).ToListAsync();
         }
 
+        public async Task<Order?> GetOrderAsync(int orderId, string userId)
+        {
+            return await _context.Orders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+        }
+
+        public async Task<CustomerOrderItemDto?> GetOrderItemAsync(int orderId, int orderItemId)
+        {
+            return await (
+                from orderitem in _context.OrderItems
+                join product in _context.Products
+                    on orderitem.ProductId equals product.Id
+                where orderitem.OrderId == orderId && orderitem.Id == orderItemId
+                select new CustomerOrderItemDto
+                {
+                    Id = orderitem.Id,
+                    OrderId = orderitem.OrderId,
+                    ProductId = product.Id,
+                    ProductName = product.ProductName,
+                    Price = orderitem.UnitPrice,
+                    TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
+                    Quantity = orderitem.Quantity
+                }).FirstOrDefaultAsync();
+        } 
+
+        public async Task<Payment?> GetPaymentAsync(int orderId)
+        {
+            return await _context.Payments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.OrderId == orderId);
+        }
         #endregion
 
-        #region Add Order&OrderItem
+        #region Add Order
         public async Task AddOrderAsync(Order order)
         {
             await _context.Orders.AddAsync(order);
         }
-
-        //public async Task AddOrderItemAsync(OrderItem orderItem)
-        //{
-        //    await _context.OrderItems.AddAsync(orderItem);
-        //    await _context.SaveChangesAsync();
-        //}
         #endregion
-
-        //#region Add Payment
-        //public async Task AddPaymentAsync(int orderId, int totalPrice)
-        //{
-        //    await _context.Payments.AddAsync(new Payment
-        //    {
-        //        Amount = totalPrice,
-        //        OrderId = orderId,
-        //        CreatedAt = DateTime.UtcNow,
-        //    });
-        //}
-        //#endregion
 
         #region Update PaymentStatus
         public async Task UpdatePaymentStatusAsync(Payment payment)

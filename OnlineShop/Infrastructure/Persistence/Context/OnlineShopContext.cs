@@ -110,6 +110,15 @@ public partial class OnlineShopContext : IdentityDbContext<ApplicationUser, Appl
         #endregion
 
         #region Seed Data
+
+        modelBuilder.Entity<Category>()
+            .HasData(new Category
+            {
+                Id = -1,
+                Title = "No Category",
+                IsDeleted = false
+            });
+
         modelBuilder.Entity<ApplicationUser>()
             .HasData(new ApplicationUser
             {

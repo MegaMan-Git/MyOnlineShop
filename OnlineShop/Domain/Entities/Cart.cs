@@ -7,12 +7,10 @@ public class Cart
 {
     public Cart()
     {
-        CartItems = new List<CartItem>();
+        CartItems = [];
     }
     public int Id { get; set; }
-
     public string UserId { get; set; } = null!;
-
 
     public ICollection<CartItem> CartItems { get; set; }
 }

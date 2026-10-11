@@ -21,6 +21,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Categories
                 .AsNoTracking()
+                .Where(c => c.IsDeleted == false)
                 .ToListAsync();
         }
 
@@ -28,7 +29,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.Categories
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id && c.IsDeleted == false);
         }
         #endregion
 
@@ -46,18 +47,17 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region DeleteCategory
-        public async Task DeleteCategoryAsync(Category category)
-        {
-            _context.Categories.Remove(category);
-        }
-        #endregion
-
         #region IsDuplicateCategoryName
-        public async Task<bool> IsDuplicateCategoryNameAsync(string newCategoryName)
+        public async Task<bool> IsDuplicateCategoryNameAsync(string categoryName)
         {
             return await _context.Categories
-                .AnyAsync(c => c.Title == newCategoryName);
+                .AnyAsync(c => c.Title == categoryName);
+        }
+
+        public async Task<bool> IsDuplicateCategoryNameAsync(string categoryName, int categoryId)
+        {
+            return await _context.Categories
+                .AnyAsync(c => c.Title == categoryName && c.Id != categoryId);
         }
         #endregion
     }

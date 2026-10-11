@@ -10,7 +10,9 @@ namespace Application.Validators.Category
     {
         public AddCategoryDtoValidator()
         {
-            RuleFor(p => p.CategoryName).NotEmpty();
+            RuleFor(p => p.CategoryName).Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage(".فیلد نام دسته بندی وارد نشده است")
+                .MaximumLength(200).WithMessage(".نام دسته بندی بیشتر از 200 کاراکتر نمیتواند باشد");
         }
     }
 }

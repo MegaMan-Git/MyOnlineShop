@@ -16,18 +16,26 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region GetProduct
+        public async Task<IEnumerable<Product>> GetProductsByCategoryId(int categoryId)
+        {
+            return await _context.Products
+                .Where(p => p.CategoryId == categoryId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        {
+            return await _context.Products
+                .Where(c => c.IsDeleted == false)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<Product?> GetProductByIdAsync(int id)
         {
             return await _context.Products
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsAsync()
-        {
-            return await _context.Products
-                .AsNoTracking()
-                .ToListAsync();
+                .FirstOrDefaultAsync(p => p.Id == id && p.IsDeleted == false);
         }
         #endregion
 
@@ -42,13 +50,6 @@ namespace Infrastructure.Repositories
         public async Task UpdateProductAsync(Product product)
         {
             _context.Products.Update(product);
-        }
-        #endregion
-
-        #region DeleteProduct
-        public async Task DeleteProductAsync(Product product)
-        {
-           _context.Products.Remove(product);
         }
         #endregion
 

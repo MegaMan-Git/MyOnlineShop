@@ -7,13 +7,11 @@ public class Order
 {
     public Order()
     {
-        orderItems = new List<OrderItem>();
+        OrderItems = [];
     }
     public int Id { get; set; }
-
     public string UserId { get; set; } = null!;
 
-
     public Payment? Payment { get; set; }
-    public ICollection<OrderItem> orderItems { get; set; }
+    public ICollection<OrderItem> OrderItems { get; set; }
 }

@@ -13,7 +13,7 @@ namespace Infrastructure.Persistence.Fluent_Configuration
         {
             // Order 1 <--> N OrderItem
             builder
-                .HasMany(o => o.orderItems)
+                .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                  //If the order is deleted, then the order items will be deleted.
