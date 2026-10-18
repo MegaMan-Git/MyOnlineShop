@@ -113,6 +113,18 @@ namespace Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("AwaitingPayment");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(450)
@@ -167,6 +179,9 @@ namespace Infrastructure.Persistence.Migrations
                     b.Property<int?>("Amount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Authority")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -174,6 +189,9 @@ namespace Infrastructure.Persistence.Migrations
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReferenceId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
