@@ -9,8 +9,10 @@ namespace Application.Dtos.Payment
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        public int? Amount { get; set; }
+        public int Amount { get; set; }
         public PaymentStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Authority { get; set; }
+        public string? ReferenceId {  get; set; }
     }
 }
