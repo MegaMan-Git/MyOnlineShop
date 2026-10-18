@@ -30,6 +30,6 @@ namespace Application.Interfaces.Repositories
         
         //delete
         Task DeleteCartItemAsync(CartItem cartItem);
-
+        Task DeleteCartItemsAsync(IEnumerable<CartItem> cartItems);
     }
 }

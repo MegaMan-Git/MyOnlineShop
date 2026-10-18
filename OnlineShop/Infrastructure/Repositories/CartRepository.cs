@@ -59,17 +59,16 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)
         {    
             return await _context.CartItems
-                .AsNoTracking()
-                .Include(p => p.Product)
                 .Where(ci => ci.CartId == cartId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<CartItem>> GetCartItemsByProductIdAsync(int productId)
         {
             return await _context.CartItems
-                .AsNoTracking()
                 .Where(ci => ci.ProductId == productId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -109,7 +108,7 @@ namespace Infrastructure.Repositories
                     Price = product.Price,
                     TotalPrice = product.Price * cartitem.Quantity
                 }
-                ).FirstOrDefaultAsync();
+                ).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<CartItem?> GetCartItemByProductIdAsync(int cartId, int productId)
@@ -135,7 +134,7 @@ namespace Infrastructure.Repositories
                     Quantity = cartitem.Quantity,
                     Price = product.Price,
                     TotalPrice = product.Price * cartitem.Quantity
-                }).ToListAsync();
+                }).AsNoTracking().ToListAsync();
         }
 
         #endregion
@@ -159,15 +158,15 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Delete Cart&CartItem
-        public async Task DeleteCartAsync(Cart cart)
-        {
-            _context.Carts.Remove(cart);
-        }
-
+        #region Delete CartItem
         public async Task DeleteCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
+        }
+
+        public async Task DeleteCartItemsAsync(IEnumerable<CartItem> cartItems)
+        {
+            _context.CartItems.RemoveRange(cartItems);
         }
         #endregion
     }

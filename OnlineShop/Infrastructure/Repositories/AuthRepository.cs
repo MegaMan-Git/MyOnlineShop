@@ -187,16 +187,34 @@ namespace Infrastructure.Repositories
             if (user is null)
             {
                 result.IsSucceeded = false;
-                result.Errors.Add("ایمیل یافت نشد.");
+                result.Errors.Add(".ایمیلی به این آدرس ثبت نشده است");
+
                 return result;
             }
 
             //get role
             var currentRoles = await _userManager.GetRolesAsync(user);
 
+            var identitiyResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (identitiyResult.Succeeded is false)
+            {
+                result.IsSucceeded = false;
+                result.Errors.AddRange(
+                    identitiyResult.Errors.Select(e => e.Description));
+                
+                return result;
+            }
+
             //delete currentrole then add new role 
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            await _userManager.AddToRoleAsync(user, roleChange.Role);
+            identitiyResult = await _userManager.AddToRoleAsync(user, roleChange.Role);
+            if (identitiyResult.Succeeded is false)
+            {
+                result.IsSucceeded = false;
+                result.Errors.AddRange(
+                    identitiyResult.Errors.Select(e => e.Description));
+
+                return result;
+            }
 
             result.IsSucceeded = true;
 
