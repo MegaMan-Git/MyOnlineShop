@@ -176,11 +176,8 @@ namespace Application.Services
             }
 
             //delete cartitems include product
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsByProductIdAsync(product.Id);
-            foreach (var cartItem in cartItems)
-            {
-                await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
-            }
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsByProductIdAsync(product.Id); 
+            await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems); 
 
 
             //softdelete product and savechanges

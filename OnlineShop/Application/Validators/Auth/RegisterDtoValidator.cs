@@ -12,7 +12,7 @@ namespace Application.Validators.Auth
         {
             RuleFor(p => p.UserName).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".نام کاربری وارد نشده")
-                .MinimumLength(4).WithMessage(".نام کاربری کوتاه هست");
+                .MinimumLength(4).WithMessage(".نام کاربری باید حداقل شامل 4 کاراکتر باشد");
             
             RuleFor(p => p.Email).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".فیلد ایمیل وارد نشده")
@@ -20,7 +20,7 @@ namespace Application.Validators.Auth
  
             RuleFor(p => p.Password).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".لطفا رمز را وارد کنید")
-                .MinimumLength(6).WithMessage(".رمز کوتاه هست");
+                .MinimumLength(6).WithMessage(".رمز باید حداقل شامل 6 کاراکتر باشد");
 
             RuleFor(p => p.PhoneNumber).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".شماره موبایل وارد نشده")

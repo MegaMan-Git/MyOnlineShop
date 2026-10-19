@@ -299,14 +299,10 @@ namespace Application.Services
                 return result;
             }
 
-            //find cartitems
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
-
             //delete cartitems
-            foreach (var cartItem in cartItems)
-            {
-                await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
-            }
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id); 
+            await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems);
+            
 
             await _unitOfWork.SaveChangesAsync();
 

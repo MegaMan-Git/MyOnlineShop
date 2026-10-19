@@ -20,7 +20,7 @@ namespace Application.Validators.Product
 
             RuleFor(p => p.Price).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".قیمت محصول وارد نشده است")
-                .GreaterThan(0).WithMessage(".قیمت محصول نمیتواند صفر باشد");
+                .GreaterThanOrEqualTo(1000).WithMessage(".قیمت محصول نمیتواند کمتر از 1000 تومان باشد");
 
             RuleFor(p => p.Stock).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".موجودی محصول وارد نشده است")

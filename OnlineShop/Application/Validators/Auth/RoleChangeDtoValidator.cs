@@ -17,7 +17,8 @@ namespace Application.Validators.Auth
 
             RuleFor(p => p.Role).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".فیلد رول وارد نشده")
-                .Must(value => Enum.TryParse<Roles>(value, true, out _))
+                .Must(value => Enum.GetNames<Roles>()
+                    .Contains(value, StringComparer.OrdinalIgnoreCase))
                 .WithMessage("Admin, Seller, Customer :مقدار ارسالی باید شامل یکی از این سه مورد باشد");
         }
     }
