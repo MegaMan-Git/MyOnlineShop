@@ -1,4 +1,5 @@
-﻿using Application.Dtos.Payment;
+﻿using Application.Dtos.Order;
+using Application.Dtos.Payment;
 using Application.Interfaces;
 using Application.Interfaces.Services;
 using Domain.Common;
@@ -48,7 +49,7 @@ namespace OnlineShop.Api.Controllers
             if (!validationResult.IsValid)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "ورودی ارسالی نامعتبر است";
+                result.Message = ".ورودی ارسالی نامعتبر است";
 
                 foreach (var error in validationResult.Errors)
                 {
@@ -124,7 +125,7 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
-        [HttpGet("payment/{orderid}")]
+        [HttpGet("{orderid}/payment")]
         public async Task<ActionResult> GetPaymentAsync(int orderId)
         {
             var userId = GetUserId();
@@ -159,15 +160,55 @@ namespace OnlineShop.Api.Controllers
 
         #region Put
         [Authorize(Roles = "Admin")]
-        [HttpPut("payment")]
-        public async Task<ActionResult> UpdatePaymentAsync(AdminChangeStatusDto adminChangeStatus)
+        [HttpPut]
+        public async Task<ActionResult> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus)
         {
-            var result = await ValidateModelAsync<PaymentDto, AdminChangeStatusDto>(adminChangeStatus);
+            var result = await ValidateModelAsync<AdminOrderDto, ChangeOrderStatusDto>(changeOrderStatus);
 
             if(result.StatusCode == ResultStatusCode.Success)
             {
-                result = await _orderService.UpdatePaymentStatusAsync(adminChangeStatus);
+                result = await _orderService.UpdateOrderStatusAsync(changeOrderStatus);
             }
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("payment")]
+        public async Task<ActionResult> UpdatePaymentAsync(ChangePaymentStatusDto changePaymentStatus)
+        {
+            var result = await ValidateModelAsync<PaymentDto, ChangePaymentStatusDto>(changePaymentStatus);
+
+            if(result.StatusCode == ResultStatusCode.Success)
+            {
+                result = await _orderService.UpdatePaymentStatusAsync(changePaymentStatus);
+            }
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        #endregion
+
+        #region Payment Process
+
+        [HttpPost("{orderId}/payment")]
+        public async Task<ActionResult> StartPayment(int orderId)
+        {
+            var userId = GetUserId();
+
+            var callbackUrl =$"{Request.Scheme}://{Request.Host}/api/order/payment/callback";
+
+            var result = await _orderService.StartPaymentAsync(userId, orderId, callbackUrl);
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("payment/callback")]
+        public async Task<ActionResult> PaymentCallback
+            ([FromQuery] string authority,
+            [FromQuery] string status)
+        {
+            var result = await _orderService.VerifyPaymentAsync(authority, status);
 
             return StatusCode((int)result.StatusCode, result);
         }

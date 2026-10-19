@@ -10,6 +10,7 @@ using Domain.Entities;
 using Domain.Enums;
 using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Application.Services
@@ -18,11 +19,13 @@ namespace Application.Services
     {
         #region DI
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IPaymentGateway _paymentGateway;
         private readonly IMapper _mapper;
 
-        public OrderService(IUnitOfWork unitOfWork,IMapper mapper)
+        public OrderService(IUnitOfWork unitOfWork, IPaymentGateway paymentGateway, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _paymentGateway = paymentGateway;
             _mapper = mapper;
         }
         #endregion
@@ -33,7 +36,7 @@ namespace Application.Services
             var result = new ServiceResult<IEnumerable<AdminOrderDto>>();
 
             var orders = await _unitOfWork.orderRepository.GetAllOrdersForAdminAsync();
-            if(!orders.Any())
+            if (!orders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".هیچ سفارشی در حال حاضر ثبت نشده است";
@@ -50,9 +53,9 @@ namespace Application.Services
         public async Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync()
         {
             var result = new ServiceResult<IEnumerable<AdminOrderItemDto>>();
-            
+
             var orderItems = await _unitOfWork.orderRepository.GetAllOrderItemsForAdminAsync();
-            if(!orderItems.Any())
+            if (!orderItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".هیچ سفارشی در حال حاضر ثبت نشده است";
@@ -88,13 +91,13 @@ namespace Application.Services
         }
 
         public async Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync
-            (string userId,int orderItemId, int orderId)
+            (string userId, int orderItemId, int orderId)
         {
             var result = new ServiceResult<CustomerOrderItemDto>();
 
             //validate request
             var order = await _unitOfWork.orderRepository.GetOrderAsync(orderId, userId);
-            if(order is null)
+            if (order is null)
             {
                 result.StatusCode = ResultStatusCode.Forbidden;
                 result.Message = "سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست.";
@@ -103,22 +106,22 @@ namespace Application.Services
             }
 
             var orderItemDto = await _unitOfWork.orderRepository.GetOrderItemAsync(orderItemId, order.Id);
-            if(orderItemDto is null)
+            if (orderItemDto is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = "آیتمی برای این سفارش یافت نشد.";
 
                 return result;
             }
-            
+
             result.StatusCode = ResultStatusCode.Success;
             result.Data = orderItemDto;
 
             return result;
         }
-       
+
         public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync
-            (string userId,int orderId)
+            (string userId, int orderId)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderItemDto>>();
 
@@ -149,7 +152,7 @@ namespace Application.Services
         #endregion
 
         #region Get Payment
-        public async Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId,int orderId)
+        public async Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId)
         {
             var result = new ServiceResult<PaymentDto>();
 
@@ -158,7 +161,7 @@ namespace Application.Services
             if (order is null)
             {
                 result.StatusCode = ResultStatusCode.Forbidden;
-                result.Message = "سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست.";
+                result.Message = ".سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست";
 
                 return result;
             }
@@ -167,7 +170,7 @@ namespace Application.Services
             if (payment is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "پرداختی برای این سفارش ثبت نشده.";
+                result.Message = ".پرداختی برای این سفارش ثبت نشده";
 
                 return result;
             }
@@ -190,7 +193,7 @@ namespace Application.Services
 
                 return result;
             }
-            
+
             result.StatusCode = ResultStatusCode.Success;
             result.Data = _mapper.Map<IEnumerable<PaymentDto>>(payments);
 
@@ -200,21 +203,21 @@ namespace Application.Services
 
         #region Add OrderItem
         public async Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync
-            (string userId,int cartItemId)
+            (string userId, int cartItemId)
         {
             var result = new ServiceResult<CustomerOrderItemDto>();
 
             //get cart and caritem
             var cart = await _unitOfWork.cartRepository.GetCartAsync(userId);
-            if(cart is null)
+            if (cart is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".سبد خرید یافت نشد";
 
                 return result;
             }
-            var cartItem = await _unitOfWork.cartRepository.GetCartItemAsync(cartItemId,cart.Id);
-            if(cartItem is null)
+            var cartItem = await _unitOfWork.cartRepository.GetCartItemAsync(cartItemId, cart.Id);
+            if (cartItem is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".آیتمی با شناسه ارسالی برای شما یافت نشد";
@@ -225,14 +228,14 @@ namespace Application.Services
 
             //check product stock
             var product = await _unitOfWork.productRepository.GetProductByIdAsync(cartItem.ProductId);
-            if(product is null)
+            if (product is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".محصول از قبل انتخاب شده دیگر در فروشگاه وجود ندارد";
 
                 return result;
             }
-            if(product.Stock < cartItem.Quantity)
+            if (product.Stock < cartItem.Quantity)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = ".تعداد سفارش درخواستی بیشتر از موجودی فعلی انبار میباشد! لطفا سفارش خود را اصلاح کنید";
@@ -240,15 +243,14 @@ namespace Application.Services
                 return result;
             }
 
-            //change product stock
-            product.Stock -= cartItem.Quantity;
-            await _unitOfWork.productRepository.UpdateProductAsync(product);
+            ////change product stock
+            //product.Stock -= cartItem.Quantity;
+            //await _unitOfWork.productRepository.UpdateProductAsync(product);
 
-            
             //add new order
-            var newOrder = new Order 
+            var newOrder = new Order
             {
-                UserId = userId 
+                UserId = userId
             };
 
             //add orderitem
@@ -264,7 +266,7 @@ namespace Application.Services
             {
                 Amount = product.Price * cartItem.Quantity
             };
- 
+
             //delete cartitem
             await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
 
@@ -276,7 +278,7 @@ namespace Application.Services
 
             //return status
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(newOrder.OrderItems.Single().Id,newOrder.Id);
+            result.Data = await _unitOfWork.orderRepository.GetOrderItemAsync(newOrder.OrderItems.Single().Id, newOrder.Id);
 
             return result;
         }
@@ -332,26 +334,26 @@ namespace Application.Services
             //if there are problems exist
             if (result.StatusCode == ResultStatusCode.BadRequest)
             {
-                result.Message = "مشکلی در هنگام ثبت سفارش پیش آمده";
+                result.Message = ".مشکلی در هنگام ثبت سفارش پیش آمده";
 
                 return result;
             }
 
-            
+
             //add new order record in database
-            var newOrder = new Order 
-            { 
-                UserId = userId 
+            var newOrder = new Order
+            {
+                UserId = userId
             };
 
-            
-            foreach(var item in cartItemDtos)
+
+            foreach (var item in cartItemDtos)
             {
                 var product = products[item.ProductId];
 
-                //change product stock
-                product.Stock -= item.Quantity;
-                await _unitOfWork.productRepository.UpdateProductAsync(product);
+                ////change product stock
+                //product.Stock -= item.Quantity;
+                //await _unitOfWork.productRepository.UpdateProductAsync(product);
 
                 //add orderitem
                 newOrder.OrderItems.Add(new OrderItem
@@ -360,7 +362,7 @@ namespace Application.Services
                     Quantity = item.Quantity,
                     UnitPrice = product.Price
                 });
-                
+
                 totalPrice += product.Price * item.Quantity;
             }
 
@@ -369,13 +371,11 @@ namespace Application.Services
             {
                 Amount = totalPrice
             };
-            
+
             //delete cartitems
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
-            foreach (var cartItem in cartItems)
-            {
-                await _unitOfWork.cartRepository.DeleteCartItemAsync(cartItem);
-            }
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id); 
+            await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems);
+            
 
             //add order & orderitems & payment
             await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
@@ -391,30 +391,333 @@ namespace Application.Services
         }
         #endregion
 
-        #region Update Payment
-        public async Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync
-            (AdminChangeStatusDto adminChangeStatus)
+        #region Payment Process
+        public async Task<ServiceResult<string>> StartPaymentAsync
+            (string userId, int orderId, string callbackUrl)
         {
-            var result = new ServiceResult<PaymentDto>();
+            var result = new ServiceResult<string>();
 
-            var payment = await _unitOfWork.orderRepository.GetPaymentAsync(adminChangeStatus.OrderId);
-            if(payment is null)
+            var order = await _unitOfWork.orderRepository.GetOrderAsync(orderId, userId);
+
+            if (order is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "شناسه ارسالی یافت نشد.";
+                result.Message = ".سفارش یافت نشد";
 
                 return result;
             }
 
-            //change status
-            var status = Enum.Parse<PaymentStatus>(adminChangeStatus.Status, true);
-            payment.Status = status.ToString();
+            var payment = await _unitOfWork.orderRepository.GetPaymentAsync(orderId);
+            if (payment is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".پرداخت یافت نشد";
 
-            await _unitOfWork.orderRepository.UpdatePaymentStatusAsync(payment);
+                return result;
+            }
+
+            if(payment.Status != PaymentStatus.Waiting.ToString())
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".وضعیت سفارش تکمیل یا منقضی شده است و دیگر امکان پرداخت آن وجود ندارد";
+
+                return result;
+            }
+
+            #region Check Product IsDeleted
+            var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
+
+            foreach (var item in orderItems)
+            {
+                if (item.Product is null)
+                    throw new InvalidOperationException(".محصول سفارش یافت نشد");
+
+                if (item.Product.IsDeleted is true)
+                {
+                    result.StatusCode = ResultStatusCode.NotFound;
+                    result.Message =
+                        ".سفارش نمیتواند تکمیل شود! زیرا حداقل یکی از محصولات دیگر در فروشگاه وجود ندارد";
+
+                    return result;
+                }
+                if (item.Product.Stock < item.Quantity)
+                {
+                    result.StatusCode = ResultStatusCode.Conflict;
+                    result.Message = ".موجودی یک یا چند محصول انتخاب شده کافی نمیباشد";
+
+                    return result;
+                }
+            }
+            #endregion
+
+            var request = await _paymentGateway.RequestAsync(payment.Amount, orderId, callbackUrl);
+            if (!request.IsSuccessful)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = request.ErrorMessage;
+
+                return result;
+            }
+
+            //add authority
+            payment.Authority = request.Authority;
             await _unitOfWork.SaveChangesAsync();
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = _mapper.Map<PaymentDto>(payment);
+            result.Data = request.PaymentUrl + request.Authority;
+
+            return result;
+        }
+
+        public async Task<ServiceResult<string>> VerifyPaymentAsync
+            (string authority, string gatewayStatus)
+        {
+            var result = new ServiceResult<string>();
+
+            var payment = await _unitOfWork.orderRepository.GetPaymentByAuthorityAsync(authority);
+
+            if (payment is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".پرداخت یافت نشد";
+
+                return result;
+            }
+          
+            if (payment.Status == PaymentStatus.Completed.ToString())
+            {
+                result.StatusCode = ResultStatusCode.Conflict;
+                result.Message = ".این پرداخت قبلاً تایید شده است";
+
+                return result;
+            }
+
+            if (gatewayStatus != "OK")
+            {
+                payment.Status = PaymentStatus.Expired.ToString();
+                await _unitOfWork.SaveChangesAsync();
+
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".پرداخت لغو یا ناموفق بود";
+
+                return result;
+            }
+
+            var verifyResult = await _paymentGateway.VerifyAsync(payment.Amount, authority);
+            
+            if (!verifyResult.IsSuccessful)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".تایید پرداخت انجام نشد";
+
+                return result;
+            }
+
+            #region Reduction Of Product Stock
+            var orderItems = await _unitOfWork.orderRepository
+                .GetOrderItemsIncludeProductsAsync(payment.OrderId);
+            
+            foreach (var item in orderItems)
+            {
+                if (item.Product is null)
+                    throw new InvalidOperationException(".محصول سفارش یافت نشد"); 
+
+                item.Product.Stock -= item.Quantity;
+            }
+            #endregion
+
+            //change order and payment status
+            payment.Status = PaymentStatus.Completed.ToString();
+            payment.Order?.Status = OrderStatus.Paid;
+            
+            payment.ReferenceId = verifyResult.ReferenceId;
+            await _unitOfWork.SaveChangesAsync();
+
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Message = ".پرداخت با موفقیت تایید شد";
+            result.Data = verifyResult.ReferenceId;
+
+            return result;
+        }
+        #endregion
+
+        #region Update Payment
+        public async Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync
+            (ChangePaymentStatusDto changePaymentStatus)
+        {
+            var result = new ServiceResult<PaymentDto>();
+
+            var order = await _unitOfWork.orderRepository.GetOrderByIdAsync(changePaymentStatus.OrderId);
+            if (order is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".سفارش یافت نشد";
+
+                return result;
+            }
+
+            if (order.Payment is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".پرداخت یافت نشد";
+
+                return result;
+            }
+
+            //get new status
+            var status = Enum.Parse<PaymentStatus>(changePaymentStatus.Status, true);
+
+            //change order status
+            if (status is PaymentStatus.Expired)
+            {
+                if (order.Payment.Status == PaymentStatus.Completed.ToString())
+                {
+                    #region Return Stock To Product
+                    var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
+
+                    foreach (var item in orderItems)
+                    {
+                        if (item.Product is null)
+                            throw new InvalidOperationException(".محصول سفارش یافت نشد");
+
+                        item.Product.Stock += item.Quantity;
+                    }
+                    #endregion
+                }
+                order.Status = OrderStatus.Cancelled;
+            }
+            else if (status is PaymentStatus.Waiting && order.Payment.Status == PaymentStatus.Completed.ToString())
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".نمیتوان وضعیت سفارش را از وضعیت تکمیل شده به در انتظار پرداخت تغییر داد";
+
+                return result;
+            }
+            else if (status is PaymentStatus.Completed && order.Payment.Status == PaymentStatus.Waiting.ToString())
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = ".نمیتوان وضعیت سفارش را از انتظار پرداخت وضعیت به در تکمیل شده تغییر داد";
+
+                return result;
+            }
+            else if (status is PaymentStatus.Waiting && order.Payment.Status == PaymentStatus.Expired.ToString())
+            {
+                order.Status = OrderStatus.AwaitingPayment;
+            } 
+            else
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = "Waiting, Expired :مقدار ارسالی باید شامل یکی از این دو مورد باشد";
+
+                return result;
+            } 
+            
+            //change payment status and savechanges
+            order.Payment.Status = status.ToString();
+            await _unitOfWork.SaveChangesAsync();
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = _mapper.Map<PaymentDto>(order.Payment);
+
+            return result;
+        }
+        #endregion
+
+        #region Update Order
+        public async Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus)
+        {
+            var result = new ServiceResult<AdminOrderDto>();
+
+            var order = await _unitOfWork.orderRepository.GetOrderByIdAsync(changeOrderStatus.OrderId);
+            if(order is null)
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".شناسه سفارش یافت نشد";
+
+                return result;
+            }
+
+            //change status type string to enum
+            var status = Enum.Parse<OrderStatus>(changeOrderStatus.Status, true);
+
+            if (order.Status is OrderStatus.AwaitingPayment &&
+                 !(status is OrderStatus.Cancelled || status is OrderStatus.Paid))
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = 
+                    ".نمیتوانید وضعیت سفارش را از در انتظار پرداخت به چیزی به غیر از لغو شده یا پرداخت شده تغییر دهید";
+
+                return result;
+            } 
+            if(order.Status is OrderStatus.AwaitingPayment && status is OrderStatus.Paid)
+            {
+                #region Reduction Of Product Stock
+                var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
+
+                foreach(var item in orderItems)
+                {
+                    if(item.Product is null)
+                        throw new InvalidOperationException(".محصول سفارش یافت نشد");
+
+                    if (item.Product.IsDeleted is true)
+                    { 
+                        result.StatusCode = ResultStatusCode.NotFound;
+                        result.Message = 
+                            ".سفارش نمیتواند تکمیل شود زیرا حداقل یکی از محصولا دیگر در فروشگاه وجود ندارد";
+
+                        return result;
+                    }
+                    if (item.Product.Stock < item.Quantity)
+                    {
+                        result.StatusCode = ResultStatusCode.BadRequest;
+                        result.Message = ".موجودی محصول کافی نیست";
+                     
+                        return result;
+                    }
+
+                    //reduce stock
+                    item.Product?.Stock -= item.Quantity;
+                }
+                #endregion
+
+                order.Payment?.Status = PaymentStatus.Completed.ToString();
+            }
+            else if (status is OrderStatus.Cancelled)
+            {
+                if(order.Payment?.Status == PaymentStatus.Completed.ToString())
+                {
+                    #region Return Stock To Product
+                    var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
+                
+                    foreach(var item in orderItems)
+                    {
+                        if (item.Product is null)
+                            throw new InvalidOperationException(".محصول سفارش یافت نشد");
+                        
+                        item.Product.Stock += item.Quantity;
+                    }
+                    #endregion
+                }
+
+                order.Payment?.Status = PaymentStatus.Expired.ToString();                
+            }
+            else if(status is OrderStatus.AwaitingPayment)
+            {
+                result.StatusCode = ResultStatusCode.BadRequest;
+                result.Message = 
+                    "Processing, Shipped, Delivered, Cancelled :مقدار ارسالی باید شامل یکی از این موارد باشد";
+
+                return result;
+            }
+
+            //change order status and savechanges
+            order.Status = status;
+            await _unitOfWork.SaveChangesAsync();
+
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = await _unitOfWork.orderRepository.GetOrderForAdminAsync(changeOrderStatus.OrderId);
 
             return result;
         }

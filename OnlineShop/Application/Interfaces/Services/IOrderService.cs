@@ -20,11 +20,18 @@ namespace Application.Interfaces.Services
         Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId);
         Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync(string userId);
 
+        //add order
         Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync
             (string userId, int cartItemId);
         Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrderFromCartItemsAsync
             (string userId);
 
-        Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync(AdminChangeStatusDto adminChangeStatus);
+        //payment
+        Task<ServiceResult<string>> StartPaymentAsync(string userId, int orderId, string callbackUrl);
+        Task<ServiceResult<string>> VerifyPaymentAsync(string authority, string gatewayStatus);
+        Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync(ChangePaymentStatusDto changePaymentStatus);
+
+        //update order
+        Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus);
     }
 }

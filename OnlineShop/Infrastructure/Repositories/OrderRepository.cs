@@ -129,6 +129,13 @@ namespace Infrastructure.Repositories
             return customerOrders;
         }
 
+        public async Task<IEnumerable<OrderItem>> GetOrderItemsIncludeProductsAsync(int orderId)
+        {
+            return await _context.OrderItems
+                .Include(oi => oi.Product)
+                .Where(oi => oi.OrderId == orderId).ToListAsync();
+        }
+
         public async Task<IEnumerable<Payment>> GetPaymentsAsync(string userId)
         {
             var orderIds = await _context.Orders
@@ -150,7 +157,7 @@ namespace Infrastructure.Repositories
         public async Task<Order?> GetOrderByIdAsync(int orderId)
         {
             return await _context.Orders
-                .Include(p => p.Payment)
+                .Include(o => o.Payment)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
         }
 
@@ -182,7 +189,7 @@ namespace Infrastructure.Repositories
         public async Task<Payment?> GetPaymentByAuthorityAsync(string Authority)
         {
             return await _context.Payments
-                .Include(o => o.Order)
+                .Include(p => p.Order)
                 .FirstOrDefaultAsync(p => p.Authority == Authority);
         }
         #endregion

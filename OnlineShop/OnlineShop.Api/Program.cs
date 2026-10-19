@@ -5,6 +5,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Application.Services;
 using Application.Validators.Auth;
+using Domain.Common;
 using FluentValidation;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
@@ -86,6 +87,15 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<ITokenEncoder, TokenEncoder>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
+#endregion
+
+#region Payment GateWay
+builder.Services.AddHttpClient<IPaymentGateway, ZarinpalPaymentGateway>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+
+builder.Services.Configure<ZarinpalOptions>(builder.Configuration.GetSection("Zarinpal"));
 #endregion
 
 #region JwtConfig
