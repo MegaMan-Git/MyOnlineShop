@@ -2,7 +2,7 @@
 using Application.Dtos.Cart.Cartitem;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
-using AutoMapper;
+using Application.Filters;
 using Domain.Entities;
 using Domain.Common;
 using Domain.Enums;
@@ -24,11 +24,12 @@ namespace Application.Services
         #endregion
 
         #region Get Cart&CartItems
-        public async Task<ServiceResult<IEnumerable<AdminCartDto>>> GetAllCartsForAdminAsync()
+        public async Task<ServiceResult<IEnumerable<AdminCartDto>>> GetAllCartsForAdminAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<AdminCartDto>>();
 
-            var carts = await _unitOfWork.cartRepository.GetAllCartsForAdminAsync();
+            var carts = await _unitOfWork.cartRepository.GetAllCartsForAdminAsync(parameters);
             if (!carts.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -43,11 +44,11 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<AdminCartItemDto>>> GetAllCartItemsForAdminAsync()
+        public async Task<ServiceResult<IEnumerable<AdminCartItemDto>>> GetAllCartItemsForAdminAsync(Application.Filters.QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<AdminCartItemDto>>();
 
-            var carItems = await _unitOfWork.cartRepository.GetAllCartItemsForAdminAsync();
+            var carItems = await _unitOfWork.cartRepository.GetAllCartItemsForAdminAsync(parameters);
             if (!carItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;

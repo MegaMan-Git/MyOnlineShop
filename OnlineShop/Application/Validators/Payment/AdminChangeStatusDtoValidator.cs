@@ -18,6 +18,7 @@ namespace Application.Validators.Payment
             RuleFor(p => p.Status).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".فیلد وضعیت پرداختی ارسال نشده است")
                 .Must(value => Enum.GetNames<PaymentStatus>()
+                    .Where(x => x is "Waiting" or "Expired")
                     .Contains(value, StringComparer.OrdinalIgnoreCase))
                 .WithMessage("Waiting, Expired :مقدار ارسالی باید شامل یکی از این دو مورد باشد");
         }

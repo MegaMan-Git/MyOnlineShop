@@ -1,6 +1,7 @@
 ﻿using Application.Dtos.Category;
 using Application.Interfaces;
 using Application.Interfaces.Services;
+using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -52,9 +53,10 @@ namespace OnlineShop.Api.Controllers
         #region Get
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
-        public async Task<ActionResult> GetAllCategoryAsync()
+        public async Task<ActionResult> GetAllCategoryAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _categoryService.GetAllCategoriesAsync();
+            var result = await _categoryService.GetAllCategoriesAsync(parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }

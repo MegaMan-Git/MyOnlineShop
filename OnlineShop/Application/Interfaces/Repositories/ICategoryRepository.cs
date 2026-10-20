@@ -1,11 +1,12 @@
 ﻿using Application.Entities;
+using Application.Filters;
 
 namespace Application.Interfaces.Repositories
 {
     public interface ICategoryRepository
     {
         //get
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(QueryStringParameters parameters);
         Task<Category?> GetCategoryByIdAsync(int id);
 
         //add

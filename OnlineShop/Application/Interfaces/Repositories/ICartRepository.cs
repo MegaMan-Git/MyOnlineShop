@@ -1,5 +1,6 @@
 ﻿using Application.Dtos.Cart;
 using Application.Dtos.Cart.Cartitem;
+using Application.Filters;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
@@ -7,8 +8,8 @@ namespace Application.Interfaces.Repositories
     public interface ICartRepository
     {
         //admin
-        Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync();
-        Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync();
+        Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync(QueryStringParameters parameters);
+        Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync(QueryStringParameters parameters);
         
         //list
         Task<IEnumerable<CustomerCartItemDto>> GetCustomerCartItemsAsync(int cartId);

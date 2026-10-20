@@ -17,7 +17,8 @@ namespace Application.Validators.Order
             RuleFor(p => p.Status).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".فیلد وضعیت سفارش وارد نشده است")
                 .Must(value => Enum.GetNames<OrderStatus>()
-                    .Contains(value, StringComparer.OrdinalIgnoreCase))
+                    .Where(x => x is "Paid" or "Processing" or "Shipped" or "Delivered" or "Cancelled")
+                    .Contains(value?.Trim(), StringComparer.OrdinalIgnoreCase))
                 .WithMessage("Paid ,Processing ,Shipped ,Delivered ,Cancelled :مقدار ارسالی باید شامل یکی از این موارد باشد");
         }
     }

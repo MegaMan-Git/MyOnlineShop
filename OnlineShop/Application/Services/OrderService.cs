@@ -2,6 +2,7 @@
 using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
 using Application.Dtos.Payment;
+using Application.Filters;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using AutoMapper;
@@ -31,11 +32,12 @@ namespace Application.Services
         #endregion
 
         #region Get Order&OrderItem For Admin
-        public async Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync()
+        public async Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<AdminOrderDto>>();
 
-            var orders = await _unitOfWork.orderRepository.GetAllOrdersForAdminAsync();
+            var orders = await _unitOfWork.orderRepository.GetAllOrdersForAdminAsync(parameters);
             if (!orders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -50,11 +52,14 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync()
+        public async Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<AdminOrderItemDto>>();
 
-            var orderItems = await _unitOfWork.orderRepository.GetAllOrderItemsForAdminAsync();
+            var orderItems = await _unitOfWork.orderRepository
+                .GetAllOrderItemsForAdminAsync(parameters);
+            
             if (!orderItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -71,11 +76,14 @@ namespace Application.Services
         #endregion
 
         #region Get Order&OrderItem
-        public async Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync(string userId)
+        public async Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync
+            (string userId, QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderDto>>();
 
-            var customerOrders = await _unitOfWork.orderRepository.GetCustomerOrdersAsync(userId);
+            var customerOrders = await _unitOfWork.orderRepository
+                .GetCustomerOrdersAsync(userId, parameters);
+            
             if (!customerOrders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -105,7 +113,9 @@ namespace Application.Services
                 return result;
             }
 
-            var orderItemDto = await _unitOfWork.orderRepository.GetOrderItemAsync(orderItemId, order.Id);
+            var orderItemDto = await _unitOfWork.orderRepository
+                .GetOrderItemAsync(orderItemId, order.Id);
+            
             if (orderItemDto is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -121,7 +131,7 @@ namespace Application.Services
         }
 
         public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync
-            (string userId, int orderId)
+            (string userId, int orderId, QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<CustomerOrderItemDto>>();
 
@@ -135,7 +145,9 @@ namespace Application.Services
                 return result;
             }
 
-            var orderItemsDto = await _unitOfWork.orderRepository.GetOrderItemsAsync(order.Id);
+            var orderItemsDto = await _unitOfWork.orderRepository
+                .GetOrderItemsAsync(order.Id, parameters);
+            
             if (!orderItemsDto.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -181,11 +193,12 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync(string userId)
+        public async Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync
+            (string userId, QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<PaymentDto>>();
 
-            var payments = await _unitOfWork.orderRepository.GetPaymentsAsync(userId);
+            var payments = await _unitOfWork.orderRepository.GetPaymentsAsync(userId, parameters);
             if (!payments.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;

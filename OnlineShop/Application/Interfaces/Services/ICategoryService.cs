@@ -1,5 +1,5 @@
 ﻿using Application.Dtos.Category;
-using Application.Entities;
+using Application.Filters;
 using Domain.Common;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,8 @@ namespace Application.Interfaces.Services
 {
     public interface ICategoryService
     {
-        Task<ServiceResult<IEnumerable<CategoryDto>>> GetAllCategoriesAsync();
+        Task<ServiceResult<IEnumerable<CategoryDto>>> GetAllCategoriesAsync
+            (QueryStringParameters parameters);
         Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(int categoryId);
 
         Task<ServiceResult<CategoryDto>> AddCategoryAsync(AddCategoryDto categoryDto);

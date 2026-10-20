@@ -1,11 +1,12 @@
-﻿using Domain.Entities;
+﻿using Application.Filters;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
 {
     public interface IProductRepository
     {
         //get list
-        Task<IEnumerable<Product>> GetAllProductsAsync();
+        Task<IEnumerable<Product>> GetAllProductsAsync(QueryStringParameters parameters);
         Task<IEnumerable<Product>> GetProductsByCategoryId(int categoryId);
 
         //get

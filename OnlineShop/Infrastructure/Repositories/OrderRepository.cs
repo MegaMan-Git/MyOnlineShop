@@ -1,9 +1,11 @@
 ﻿using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
+using Application.Filters;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Security;
 
 namespace Infrastructure.Repositories
 {
@@ -17,11 +19,13 @@ namespace Infrastructure.Repositories
 
         }
         #endregion
-
+        
         #region Get AllOrders&OrderItems
-        public async Task<IEnumerable<AdminOrderDto>> GetAllOrdersForAdminAsync()
+        public async Task<IEnumerable<AdminOrderDto>> GetAllOrdersForAdminAsync
+            (QueryStringParameters parameters)
         {
-            return await (
+            #region Lazy Query
+            var orders = 
                 from order in _context.Orders
                 join payment in _context.Payments
                     on order.Id equals payment.OrderId
@@ -35,12 +39,31 @@ namespace Infrastructure.Repositories
                     CreatedAt = order.CreatedAt,
                     Authority = payment.Authority,
                     ReferenceId = payment.ReferenceId
-                }).AsNoTracking().ToListAsync();
+                };
+            #endregion
+
+            #region Sorting 
+            orders =
+                parameters.SortDirection == "asc" ?
+                    orders.OrderBy(c => c.UserName).ThenBy(c => c.OrderId) :
+                    orders.OrderByDescending(c => c.UserName).ThenByDescending(c => c.OrderId);
+            #endregion
+
+            #region Pagination
+            orders = orders
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await orders.AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<AdminOrderItemDto>> GetAllOrderItemsForAdminAsync()
+        public async Task<IEnumerable<AdminOrderItemDto>> GetAllOrderItemsForAdminAsync
+            (QueryStringParameters parameters)
         {
-            return await (
+            #region Lazy Query
+            var orderItems =
                 from order in _context.Orders
                 join orderitem in _context.OrderItems
                     on order.Id equals orderitem.OrderId
@@ -57,7 +80,24 @@ namespace Infrastructure.Repositories
                     Price = orderitem.UnitPrice,
                     TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
                     Quantity = orderitem.Quantity
-                }).AsNoTracking().ToListAsync();
+                };
+            #endregion
+
+            #region Sorting 
+            orderItems =
+                parameters.SortDirection == "asc" ?
+                    orderItems.OrderBy(c => c.UserName).ThenBy(c => c.Id) :
+                    orderItems.OrderByDescending(c => c.UserName).ThenByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            orderItems = orderItems
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await orderItems.AsNoTracking().ToListAsync();
         }
         #endregion
 
@@ -101,32 +141,77 @@ namespace Infrastructure.Repositories
                 }).AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync(string userId)
+        public async Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync
+            (int orderId, QueryStringParameters parameters)
         {
-            var orders = await _context.Orders
-                .Where(o => o.UserId == userId)
-                .OrderBy(o => o.Id)
-                .Include(p => p.Payment)
-                .AsNoTracking() 
-                .ToListAsync();
-            
-            var customerOrders = new List<CustomerOrderDto>();
-            int number = 0;
-
-            foreach (var order in orders)
-            {
-                customerOrders.Add(new CustomerOrderDto
+            #region Lazy Query
+            var orderItems =
+                from orderitem in _context.OrderItems
+                join product in _context.Products
+                    on orderitem.ProductId equals product.Id
+                where orderitem.OrderId == orderId
+                select new CustomerOrderItemDto
                 {
-                    OrderId = order.Id,
-                    OrderName = $"سفارش شماره {++number}",
+                    Id = orderitem.Id,
+                    OrderId = orderitem.OrderId,
+                    ProductId = product.Id,
+                    ProductName = product.ProductName,
+                    Price = orderitem.UnitPrice,
+                    TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
+                    Quantity = orderitem.Quantity,
+                };
+            #endregion
+
+            #region Sorting 
+            orderItems =
+                parameters.SortDirection == "asc" ?
+                    orderItems.OrderBy(c => c.Id) : orderItems.OrderByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            orderItems = orderItems
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await orderItems.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync
+            (string userId, QueryStringParameters parameters)
+        {
+            #region Lazy Query
+            var orders =
+                from order in _context.Orders
+                join payment in _context.Payments
+                    on order.Id equals payment.OrderId
+                where order.UserId == userId
+                select new CustomerOrderDto
+                {
+                    Id = order.Id,
                     Status = order.Status,
                     CreatedAt = order.CreatedAt,
-                    Authority = order.Payment?.Authority,
-                    ReferenceId = order.Payment?.ReferenceId
-                });
-            }
+                    Authority = payment.Authority,
+                    ReferenceId = payment.ReferenceId
+                };
+            #endregion
 
-            return customerOrders;
+            #region Sorting
+            orders =
+                parameters.SortDirection == "asc" ?
+                    orders.OrderBy(c => c.CreatedAt).ThenBy(c => c.Id) :
+                    orders.OrderByDescending(c => c.CreatedAt).ThenByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            orders = orders
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await orders.AsNoTracking().ToListAsync();
         }
 
         public async Task<IEnumerable<OrderItem>> GetOrderItemsIncludeProductsAsync(int orderId)
@@ -136,15 +221,42 @@ namespace Infrastructure.Repositories
                 .Where(oi => oi.OrderId == orderId).ToListAsync();
         }
 
-        public async Task<IEnumerable<Payment>> GetPaymentsAsync(string userId)
+        public async Task<IEnumerable<Payment>> GetPaymentsAsync
+            (string userId, QueryStringParameters parameters)
         {
-            var orderIds = await _context.Orders
-                .AsNoTracking()
-                .Where(o => o.UserId == userId).Select(o => o.Id).ToListAsync();
+            #region Lazy Query
+            var payments =
+                from order in _context.Orders
+                join payment in _context.Payments
+                    on order.Id equals payment.OrderId
+                where order.UserId == userId
+                select new Payment
+                {
+                    Id = payment.Id,
+                    OrderId = payment.OrderId,
+                    Amount = payment.Amount,
+                    Status = payment.Status,
+                    CreatedAt = payment.CreatedAt,
+                    Authority = payment.Authority,
+                    ReferenceId = payment.ReferenceId
+                };
+            #endregion
 
-            return await _context.Payments
-                .AsNoTracking()
-                .Where(p => orderIds.Contains(p.OrderId)).ToListAsync();
+            #region Sorting 
+            payments =
+                parameters.SortDirection == "asc" ?
+                    payments.OrderBy(p => p.Id) :
+                    payments.OrderByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            payments = payments
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await payments.AsNoTracking().ToListAsync();
         }
 
         public async Task<Order?> GetOrderAsync(int orderId, string userId)

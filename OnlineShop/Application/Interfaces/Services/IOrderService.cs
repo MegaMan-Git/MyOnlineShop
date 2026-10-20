@@ -1,4 +1,4 @@
-﻿using Application.Dtos.Cart.Cartitem;
+﻿using Application.Filters;
 using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
 using Application.Dtos.Payment;
@@ -12,26 +12,42 @@ namespace Application.Interfaces.Services
 {
     public interface IOrderService
     {
-        Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync();
-        Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync();
-        Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync(string userId);
-        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync(string userId,int orderId);
-        Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync(string userId,int orderItemId, int orderId);
-        Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId);
-        Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync(string userId);
+        //get list admin
+        Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync
+            (QueryStringParameters parameters);
+        Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync
+            (QueryStringParameters parameters);
+        
+        //get list
+        Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync
+            (string userId, QueryStringParameters parameters);
+        Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync
+            (string userId, int orderId, QueryStringParameters parameters);
+        Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync
+            (string userId, QueryStringParameters parameters);
 
-        //add order
+        //get 
+        Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync
+            (string userId,int orderItemId, int orderId);
+        Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId);
+        
+
+        //add
         Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync
             (string userId, int cartItemId);
         Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrderFromCartItemsAsync
             (string userId);
 
         //payment
-        Task<ServiceResult<string>> StartPaymentAsync(string userId, int orderId, string callbackUrl);
-        Task<ServiceResult<string>> VerifyPaymentAsync(string authority, string gatewayStatus);
-        Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync(ChangePaymentStatusDto changePaymentStatus);
+        Task<ServiceResult<string>> StartPaymentAsync
+            (string userId, int orderId, string callbackUrl);
+        Task<ServiceResult<string>> VerifyPaymentAsync
+            (string authority, string gatewayStatus);
 
-        //update order
-        Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus);
+        //update
+        Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync
+            (ChangePaymentStatusDto changePaymentStatus);
+        Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync
+            (ChangeOrderStatusDto changeOrderStatus);
     }
 }

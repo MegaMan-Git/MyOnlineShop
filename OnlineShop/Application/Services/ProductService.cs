@@ -1,7 +1,7 @@
-﻿using Application.AutoMapper;
-using Application.Dtos.Product;
+﻿using Application.Dtos.Product;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
+using Application.Filters;
 using AutoMapper;
 using Domain.Common;
 using Domain.Enums;
@@ -25,12 +25,13 @@ namespace Application.Services
         #endregion
 
         #region Get Product
-        public async Task<ServiceResult<IEnumerable<ProductDto>>> GetAllProductsAsync()
+        public async Task<ServiceResult<IEnumerable<ProductDto>>> GetAllProductsAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<ProductDto>>();
 
             //get all products
-            var products = await _unitOfWork.productRepository.GetAllProductsAsync();
+            var products = await _unitOfWork.productRepository.GetAllProductsAsync(parameters);
 
             if (!products.Any())
             {

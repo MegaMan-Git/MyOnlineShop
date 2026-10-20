@@ -2,6 +2,7 @@
 using Application.Entities;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
+using Application.Filters;
 using AutoMapper;
 using Domain.Common;
 using Domain.Enums;
@@ -24,11 +25,12 @@ namespace Application.Services
         #endregion
 
         #region Get Category
-        public async Task<ServiceResult<IEnumerable<CategoryDto>>> GetAllCategoriesAsync()
+        public async Task<ServiceResult<IEnumerable<CategoryDto>>> GetAllCategoriesAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<CategoryDto>>();
 
-            var categories = await _unitOfWork.categoryRepository.GetAllCategoriesAsync();
+            var categories = await _unitOfWork.categoryRepository.GetAllCategoriesAsync(parameters);
             if(!categories.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;

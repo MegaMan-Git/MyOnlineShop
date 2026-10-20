@@ -2,6 +2,7 @@
 using Application.Dtos.Payment;
 using Application.Interfaces;
 using Application.Interfaces.Services;
+using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Infrastructure.Identity;
@@ -67,18 +68,20 @@ namespace OnlineShop.Api.Controllers
         #region Get Admin
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/order")]
-        public async Task<ActionResult> GetAllOrderAsync()
+        public async Task<ActionResult> GetAllOrderAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _orderService.GetAllOrdersForAdminAsync();
+            var result = await _orderService.GetAllOrdersForAdminAsync(parameters);
         
             return StatusCode((int)result.StatusCode, result);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/orderitem")]
-        public async Task<ActionResult> GetAllOrderItemAsync()
+        public async Task<ActionResult> GetAllOrderItemAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _orderService.GetAllOrderItemsForAdminAsync();
+            var result = await _orderService.GetAllOrderItemsForAdminAsync(parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
@@ -86,21 +89,23 @@ namespace OnlineShop.Api.Controllers
 
         #region Get
         [HttpGet]
-        public async Task<ActionResult> GetOrdersAsync()
+        public async Task<ActionResult> GetOrdersAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
             var userId = GetUserId();
 
-            var result = await _orderService.GetOrdersAsync(userId);
+            var result = await _orderService.GetOrdersAsync(userId, parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
 
         [HttpGet("{orderid}")]
-        public async Task<ActionResult> GetOrderItemsAsync(int orderId)
+        public async Task<ActionResult> GetOrderItemsAsync
+            (int orderId, [FromQuery] QueryStringParameters parameters)
         {
             var userId = GetUserId();
 
-            var result = await _orderService.GetOrderItemsAsync(userId, orderId);
+            var result = await _orderService.GetOrderItemsAsync(userId, orderId, parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
@@ -116,11 +121,12 @@ namespace OnlineShop.Api.Controllers
         }
 
         [HttpGet("payment")]
-        public async Task<ActionResult> GetPaymentsAsync()
+        public async Task<ActionResult> GetPaymentsAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
             var userId = GetUserId();
 
-            var result = await _orderService.GetPaymentsAsync(userId);
+            var result = await _orderService.GetPaymentsAsync(userId, parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
