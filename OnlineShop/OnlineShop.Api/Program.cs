@@ -15,137 +15,165 @@ using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OnlineShop.Api.Middlewares;
+using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/app-.log",
+        rollingInterval: RollingInterval.Day,
+        rollOnFileSizeLimit: true)
+    .CreateBootstrapLogger();
 
-#region Add services
-// Add services to the container.
-
-builder.Services.AddControllers()
-    // Remove properties with null values from JSON responses.
-    .AddJsonOptions(options =>
-    {
-        //Ignore null result in response json
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-
-        //Show enum value to string for payment status
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
-
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
-#region Add connection string
-builder.Services.AddDbContext<OnlineShopContext>(option =>
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-#endregion
-
-#region Add Identity service
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+try
 {
-    options.User.RequireUniqueEmail = true;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Password.RequiredLength = 6;
-}).AddEntityFrameworkStores<OnlineShopContext>()
-    .AddDefaultTokenProviders();
-#endregion
+    var builder = WebApplication.CreateBuilder(args);
 
-#region Add AutoMapper
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.AddProfile<ProfileMapper>();
-});
-#endregion
+    builder.Services.AddSerilog();
 
-#region Add FluentValidation
-builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
-#endregion
+    #region Add services
+    // Add services to the container.
 
-#region Ioc Container
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-builder.Services.AddScoped<ICartRepository, CartRepository>();
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-
-builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
-builder.Services.AddScoped<ITokenEncoder, TokenEncoder>();
-builder.Services.AddScoped<IValidationService, ValidationService>();
-#endregion
-
-#region Payment GateWay
-builder.Services.AddHttpClient<IPaymentGateway, ZarinpalPaymentGateway>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(15);
-});
-
-builder.Services.Configure<ZarinpalOptions>(builder.Configuration.GetSection("Zarinpal"));
-#endregion
-
-#region JwtConfig
-builder.Services.AddAuthentication(option =>
-    {
-        option.DefaultAuthenticateScheme = "Bearer";
-        option.DefaultChallengeScheme = "Bearer";
-    })
-    .AddJwtBearer(option =>
-    {
-        option.TokenValidationParameters = new()
+    builder.Services.AddControllers()
+        // Remove properties with null values from JSON responses.
+        .AddJsonOptions(options =>
         {
-            ValidateIssuer = true,
-            ValidateIssuerSigningKey = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
+            //Ignore null result in response json
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 
-            ValidIssuer = builder.Configuration["Authentication:Issuer"],
-            ValidAudience = builder.Configuration["Authentication:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    builder.Configuration["Authentication:SecretKey"]!))
-        };
+            //Show enum value to string for payment status
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+    // Swagger
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+
+    #region Add connection string
+    builder.Services.AddDbContext<OnlineShopContext>(option =>
+        option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+    );
+    #endregion
+
+    #region Add Identity service
+    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Password.RequiredLength = 6;
+    }).AddEntityFrameworkStores<OnlineShopContext>()
+        .AddDefaultTokenProviders();
+    #endregion
+
+    #region Add AutoMapper
+    builder.Services.AddAutoMapper(cfg =>
+    {
+        cfg.AddProfile<ProfileMapper>();
     });
-#endregion
+    #endregion
+
+    #region Add FluentValidation
+    builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
+    #endregion
+
+    #region Ioc Container
+    builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+    builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+    builder.Services.AddScoped<ICartRepository, CartRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+    builder.Services.AddScoped<IAuthService, AuthService>();
+    builder.Services.AddScoped<ICartService, CartService>();
+    builder.Services.AddScoped<ICategoryService, CategoryService>();
+    builder.Services.AddScoped<IOrderService, OrderService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
+
+    builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+    builder.Services.AddScoped<ITokenEncoder, TokenEncoder>();
+    builder.Services.AddScoped<IValidationService, ValidationService>();
+    #endregion
+
+    #region Payment GateWay
+    builder.Services.AddHttpClient<IPaymentGateway, ZarinpalPaymentGateway>(client =>
+    {
+        client.Timeout = TimeSpan.FromSeconds(15);
+    });
+
+    builder.Services.Configure<ZarinpalOptions>(builder.Configuration.GetSection("Zarinpal"));
+    #endregion
+
+    #region JwtConfig
+    builder.Services.AddAuthentication(option =>
+        {
+            option.DefaultAuthenticateScheme = "Bearer";
+            option.DefaultChallengeScheme = "Bearer";
+        })
+        .AddJwtBearer(option =>
+        {
+            option.TokenValidationParameters = new()
+            {
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+
+                ValidIssuer = builder.Configuration["Authentication:Issuer"],
+                ValidAudience = builder.Configuration["Authentication:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(
+                        builder.Configuration["Authentication:SecretKey"]!))
+            };
+        });
+    #endregion
 
 
-#endregion
+    #endregion
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
+    app.UseSerilogRequestLogging();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseMiddleware<GlobalExceptionMiddleware>();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapGet("/", () => Results.Redirect("/swagger"));
+    }
+
+    app.Run();
 }
-
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-if (app.Environment.IsDevelopment())
+catch(Exception ex)
 {
-    app.MapGet("/", () => Results.Redirect("/swagger"));
+    Log.Fatal(ex, "Application terminated unexpectedly");
 }
-
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}

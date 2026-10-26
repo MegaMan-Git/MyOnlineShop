@@ -5,6 +5,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
 using Domain.Common;
 using Domain.Enums;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,14 +19,17 @@ namespace Application.Services
         private readonly IAuthRepository _authRepository;
         private readonly ITokenEncoder _tokenEncoder;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(IAuthRepository authRepository,
             ITokenEncoder tokenEncoder,
-            IJwtTokenGenerator jwtTokenGenerator)
+            IJwtTokenGenerator jwtTokenGenerator,
+            ILogger<AuthService> logger)
         {
             _authRepository = authRepository;
             _tokenEncoder = tokenEncoder;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _logger = logger;
         }
         #endregion
 
@@ -39,6 +43,8 @@ namespace Application.Services
 
             if (result.IsSucceeded is false)
             {
+                _logger.LogWarning("Sign-in failed for Email {Email}", loginDto.Email);
+
                 serviceResult.Message = ".ایمیل یا رمز عبور صحیح نمیباشد";
                 serviceResult.Errors = result.Errors;
                 serviceResult.StatusCode = ResultStatusCode.Unauthorized;
@@ -55,6 +61,8 @@ namespace Application.Services
                 Token = token
             };
 
+            _logger.LogInformation("Sign-in succeeded for Email {Email}", loginDto.Email);
+
             return serviceResult;
         }
         #endregion
@@ -69,6 +77,8 @@ namespace Application.Services
 
             if (result.IsSucceeded is false)
             {
+                _logger.LogWarning("Registration failed for Email {Email}", registerDto.Email);
+
                 serviceResult.Message = ".ثبت نام انجام نشد";
                 serviceResult.Errors = result.Errors;
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
@@ -77,10 +87,13 @@ namespace Application.Services
             }
 
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email, result.UserId, result.Role);
+            string token = _jwtTokenGenerator
+                .GenerateToken(registerDto.Email, result.UserId, result.Role);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto { Token = token };
+
+            _logger.LogInformation("Registration succeeded for Email {Email}", registerDto.Email);
 
             return serviceResult;
         }

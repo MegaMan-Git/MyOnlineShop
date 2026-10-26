@@ -9,6 +9,7 @@ using AutoMapper;
 using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -22,12 +23,17 @@ namespace Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPaymentGateway _paymentGateway;
         private readonly IMapper _mapper;
+        private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IUnitOfWork unitOfWork, IPaymentGateway paymentGateway, IMapper mapper)
+        public OrderService(IUnitOfWork unitOfWork,
+            IPaymentGateway paymentGateway,
+            IMapper mapper,
+            ILogger<OrderService> logger)
         {
             _unitOfWork = unitOfWork;
             _paymentGateway = paymentGateway;
             _mapper = mapper;
+            _logger = logger;
         }
         #endregion
 
@@ -38,6 +44,7 @@ namespace Application.Services
             var result = new ServiceResult<IEnumerable<AdminOrderDto>>();
 
             var orders = await _unitOfWork.orderRepository.GetAllOrdersForAdminAsync(parameters);
+
             if (!orders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -59,7 +66,7 @@ namespace Application.Services
 
             var orderItems = await _unitOfWork.orderRepository
                 .GetAllOrderItemsForAdminAsync(parameters);
-            
+
             if (!orderItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -83,7 +90,7 @@ namespace Application.Services
 
             var customerOrders = await _unitOfWork.orderRepository
                 .GetCustomerOrdersAsync(userId, parameters);
-            
+
             if (!customerOrders.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -414,6 +421,11 @@ namespace Application.Services
 
             if (order is null)
             {
+                _logger.LogWarning(
+                    "Payment start failed because OrderId {OrderId} was not found for UserId {UserId}",
+                    orderId,
+                    userId);
+
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".سفارش یافت نشد";
 
@@ -432,7 +444,8 @@ namespace Application.Services
             if(payment.Status != PaymentStatus.Waiting.ToString())
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = ".وضعیت سفارش تکمیل یا منقضی شده است و دیگر امکان پرداخت آن وجود ندارد";
+                result.Message =
+                    ".وضعیت سفارش تکمیل یا منقضی شده است و دیگر امکان پرداخت آن وجود ندارد";
 
                 return result;
             }
@@ -466,6 +479,11 @@ namespace Application.Services
             var request = await _paymentGateway.RequestAsync(payment.Amount, orderId, callbackUrl);
             if (!request.IsSuccessful)
             {
+                _logger.LogWarning(
+                    "Payment request failed for OrderId {OrderId}: {Reason}",
+                    orderId,
+                    request.ErrorMessage);
+
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = request.ErrorMessage;
 
@@ -479,6 +497,9 @@ namespace Application.Services
             result.StatusCode = ResultStatusCode.Success;
             result.Data = request.PaymentUrl + request.Authority;
 
+            _logger.LogInformation(
+                "Payment started successfully for OrderId {OrderId}", orderId);
+
             return result;
         }
 
@@ -491,6 +512,9 @@ namespace Application.Services
 
             if (payment is null)
             {
+                _logger.LogWarning(
+                    "Payment verification failed because the payment was not found");
+
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".پرداخت یافت نشد";
 
@@ -520,6 +544,11 @@ namespace Application.Services
             
             if (!verifyResult.IsSuccessful)
             {
+                _logger.LogWarning(
+                    "Payment verification failed for OrderId {OrderId}: {Reason}",
+                    payment.OrderId,
+                    verifyResult.ErrorMessage);
+
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = ".تایید پرداخت انجام نشد";
 
@@ -535,7 +564,15 @@ namespace Application.Services
                 if (item.Product is null)
                     throw new InvalidOperationException(".محصول سفارش یافت نشد"); 
 
+                var oldStock = item.Product.Stock;
                 item.Product.Stock -= item.Quantity;
+
+                _logger.LogInformation(
+                    "Stock reduced for ProductId {ProductId}: {OldStock} -> {NewStock} after payment for OrderId {OrderId}",
+                    item.Product.Id,
+                    oldStock,
+                    item.Product.Stock,
+                    payment.OrderId);
             }
             #endregion
 
@@ -550,6 +587,11 @@ namespace Application.Services
             result.StatusCode = ResultStatusCode.Success;
             result.Message = ".پرداخت با موفقیت تایید شد";
             result.Data = verifyResult.ReferenceId;
+
+            _logger.LogInformation(
+                "Payment verified successfully for OrderId {OrderId} with ReferenceId {ReferenceId}",
+                payment.OrderId,
+                verifyResult.ReferenceId);
 
             return result;
         }
@@ -594,7 +636,15 @@ namespace Application.Services
                         if (item.Product is null)
                             throw new InvalidOperationException(".محصول سفارش یافت نشد");
 
+                        var oldStock = item.Product.Stock;
                         item.Product.Stock += item.Quantity;
+
+                        _logger.LogInformation(
+                            "Stock restored for ProductId {ProductId}: {OldStock} -> {NewStock} after payment expiration for OrderId {OrderId}",
+                            item.Product.Id,
+                            oldStock,
+                            item.Product.Stock,
+                            order.Id);
                     }
                     #endregion
                 }
@@ -650,6 +700,8 @@ namespace Application.Services
 
                 return result;
             }
+
+            var oldOrderStatus = order.Status;
 
             //change status type string to enum
             var status = Enum.Parse<OrderStatus>(changeOrderStatus.Status, true);
@@ -708,7 +760,15 @@ namespace Application.Services
                         if (item.Product is null)
                             throw new InvalidOperationException(".محصول سفارش یافت نشد");
                         
+                        var oldStock = item.Product.Stock;
                         item.Product.Stock += item.Quantity;
+
+                        _logger.LogInformation(
+                            "Stock restored for ProductId {ProductId}: {OldStock} -> {NewStock} after order cancellation for OrderId {OrderId}",
+                            item.Product.Id,
+                            oldStock,
+                            item.Product.Stock,
+                            order.Id);
                     }
                     #endregion
                 }
@@ -726,6 +786,11 @@ namespace Application.Services
 
             //change order status and savechanges
             order.Status = status;
+            _logger.LogInformation(
+                "Order status changed for OrderId {OrderId}: {OldStatus} -> {NewStatus}",
+                order.Id,
+                oldOrderStatus,
+                order.Status);
             await _unitOfWork.SaveChangesAsync();
 
 
