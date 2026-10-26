@@ -1,6 +1,7 @@
 ﻿using Application.Dtos.Category;
 using Application.Interfaces;
 using Application.Interfaces.Services;
+using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -11,7 +12,6 @@ namespace OnlineShop.Api.Controllers
 {
     [Route("api/category")]
     [ApiController]
-    [Authorize]
     public class CategoryController : ControllerBase
     {
         #region DI
@@ -51,14 +51,17 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
-        public async Task<ActionResult> GetAllCategoryAsync()
+        public async Task<ActionResult> GetAllCategoryAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _categoryService.GetAllCategoriesAsync();
+            var result = await _categoryService.GetAllCategoriesAsync(parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCategoryByIdAsync(int id)
         {
@@ -69,6 +72,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> AddCategoryAsync(AddCategoryDto category)
         {
@@ -84,6 +88,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult> UpdateCategoryAsync(UpdateCategoryDto category)
         {
@@ -99,10 +104,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategoryAsync(int id)
         {
-            var result = await _categoryService.DeleteCategoryAsync(id);
+            var result = await _categoryService.SoftDeleteCategoryAsync(id);
 
             return StatusCode((int)result.StatusCode, result);
         }

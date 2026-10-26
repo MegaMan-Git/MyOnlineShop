@@ -1,6 +1,6 @@
 ﻿using Application.Dtos.Cart.Cartitem;
 using Application.Interfaces;
-using Application.Interfaces.Repositories;
+using Application.Filters;
 using Application.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
@@ -65,18 +65,22 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get Admin
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
-        public async Task<ActionResult> GetAllCartsAsync()
+        public async Task<ActionResult> GetAllCartsAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _cartService.GetAllCartsForAdminAsync();
+            var result = await _cartService.GetAllCartsForAdminAsync(parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("admin/items")]
-        public async Task<ActionResult> GetAllCartItemsAsync()
+        public async Task<ActionResult> GetAllCartItemsAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _cartService.GetAllCartItemsForAdminAsync();
+            var result = await _cartService.GetAllCartItemsForAdminAsync(parameters);
 
             return StatusCode((int)result.StatusCode, result);
         }

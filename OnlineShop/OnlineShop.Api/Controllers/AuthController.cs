@@ -4,6 +4,7 @@ using Application.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Win32;
@@ -110,6 +111,33 @@ namespace OnlineShop.Api.Controllers
             if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _authService.ResetPasswordAsync(resetPassword);
+            }
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        #endregion
+
+        #region GetUserRoles
+        [Authorize(Roles = "Admin")]
+        [HttpGet("user/roles")]
+        public async Task<ActionResult> GetUserRolesAsync()
+        {
+            var result = await _authService.GetUserRolesAsync();
+
+            return StatusCode((int)result.StatusCode, result);
+        }
+        #endregion
+
+        #region ChangeUserRole
+        [Authorize(Roles = "Admin")]
+        [HttpPut("user/roles")]
+        public async Task<ActionResult> UpdateUserRole(RoleChangeDto roleChange)
+        {
+            var result = await ValidateModelAsync<string, RoleChangeDto>(roleChange);
+         
+            if(result.StatusCode == ResultStatusCode.Success)
+            {
+                result = await _authService.ChangeUserRoleAsync(roleChange);
             }
 
             return StatusCode((int)result.StatusCode, result);

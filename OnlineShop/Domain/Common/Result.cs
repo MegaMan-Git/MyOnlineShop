@@ -7,6 +7,7 @@ namespace Domain.Common
     public class Result
     {
         public string UserId { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
         public bool IsSucceeded { get; set; }
 
         public List<string> Errors { get; set; } = new List<string>();

@@ -1,6 +1,7 @@
 ﻿using Application.Dtos.Product;
 using Application.Interfaces;
 using Application.Interfaces.Services;
+using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,6 @@ namespace OnlineShop.Api.Controllers
 {
     [Route("api/product")]
     [ApiController]
-    [Authorize]
     public class ProductController : ControllerBase
     {
         #region DI
@@ -51,15 +51,18 @@ namespace OnlineShop.Api.Controllers
         }
         #endregion
 
-        #region Get       
+        #region Get
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
-        public async Task<ActionResult> GetAllProductsAsync()
+        public async Task<ActionResult> GetAllProductsAsync
+            ([FromQuery] QueryStringParameters parameters)
         {
-            var result = await _productService.GetAllProductsAsync();
+            var result = await _productService.GetAllProductsAsync(parameters);
             
             return StatusCode((int)result.StatusCode, result);
         }
 
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetProductByIdAsync(int id)
         {
@@ -71,6 +74,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<ActionResult> AddProductAsync(AddProductDto product)
         {
@@ -86,6 +90,7 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        [Authorize(Roles = "Admin,Seller")]
         [HttpPut]
         public async Task<ActionResult> UpdateProductAsync(UpdateProductDto product)
         {
@@ -101,10 +106,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProductAsync(int id)
         {
-            var result = await _productService.DeleteProductAsync(id);
+            var result = await _productService.SoftDeleteProductAsync(id);
 
             return StatusCode((int)result.StatusCode, result);
         }

@@ -8,11 +8,11 @@ public class Category
 {
     public Category()
     {
-        products = new List<Product>();
+        Products = [];
     }
     public int Id { get; set; }
-
     public string Title { get; set; } = null!;
+    public bool IsDeleted { get; set; }
 
-    public ICollection<Product> products { get; set; }
+    public ICollection<Product> Products { get; set; }
 }

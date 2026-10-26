@@ -6,15 +6,12 @@ namespace Domain.Entities;
 public class Payment
 {
     public int Id { get; set; }
-
     public int OrderId { get; set; }
-
-    public int? Amount { get; set; }
-
+    public int Amount { get; set; }
     public string Status { get; set; } = null!;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string? Authority { get; set; }
+    public string? ReferenceId { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-
-    
     public Order? Order { get; set; }
 }

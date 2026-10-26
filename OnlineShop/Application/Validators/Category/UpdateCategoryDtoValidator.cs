@@ -10,11 +10,12 @@ namespace Application.Validators.Category
     {
         public UpdateCategoryDtoValidator()
         {
-            RuleFor(p => p.Id).Cascade(CascadeMode.Stop)
-                .NotEmpty().WithMessage(".آیدی دسته بندی وارد نشده است")
-                .GreaterThan(0).WithMessage(".مقدار آیدی نادرست وارد شده است");
+            RuleFor(p => p.Id)
+                .NotEmpty().WithMessage(".آیدی دسته بندی وارد نشده است");
 
-            RuleFor(p => p.NewCategoryName).NotEmpty();  
+            RuleFor(p => p.NewCategoryName).Cascade(CascadeMode.Stop)
+                .NotEmpty().WithMessage(".فیلد نام دسته بندی وارد نشده است")
+                .MaximumLength(200).WithMessage(".نام دسته بندی بیشتر از 200 کاراکتر نمیتواند باشد");
         }
     }
 }

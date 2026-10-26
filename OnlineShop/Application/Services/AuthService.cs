@@ -2,8 +2,10 @@
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.UnitOfWork;
 using Domain.Common;
 using Domain.Enums;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,14 +19,17 @@ namespace Application.Services
         private readonly IAuthRepository _authRepository;
         private readonly ITokenEncoder _tokenEncoder;
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        private readonly ILogger<AuthService> _logger;
 
         public AuthService(IAuthRepository authRepository,
             ITokenEncoder tokenEncoder,
-            IJwtTokenGenerator jwtTokenGenerator)
+            IJwtTokenGenerator jwtTokenGenerator,
+            ILogger<AuthService> logger)
         {
             _authRepository = authRepository;
             _tokenEncoder = tokenEncoder;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _logger = logger;
         }
         #endregion
 
@@ -38,20 +43,25 @@ namespace Application.Services
 
             if (result.IsSucceeded is false)
             {
+                _logger.LogWarning("Sign-in failed for Email {Email}", loginDto.Email);
+
                 serviceResult.Message = ".ایمیل یا رمز عبور صحیح نمیباشد";
                 serviceResult.Errors = result.Errors;
                 serviceResult.StatusCode = ResultStatusCode.Unauthorized;
 
                 return serviceResult;
             }
+
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email,result.UserId);
+            string token = _jwtTokenGenerator.GenerateToken(loginDto.Email, result.UserId, result.Role);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto
             {
                 Token = token
             };
+
+            _logger.LogInformation("Sign-in succeeded for Email {Email}", loginDto.Email);
 
             return serviceResult;
         }
@@ -67,17 +77,23 @@ namespace Application.Services
 
             if (result.IsSucceeded is false)
             {
+                _logger.LogWarning("Registration failed for Email {Email}", registerDto.Email);
+
+                serviceResult.Message = ".ثبت نام انجام نشد";
                 serviceResult.Errors = result.Errors;
-                serviceResult.Message = "ثبت نام انجام نشد.";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
 
                 return serviceResult;
             }
+
             //generate jwt token
-            string token = _jwtTokenGenerator.GenerateToken(registerDto.Email,result.UserId);
+            string token = _jwtTokenGenerator
+                .GenerateToken(registerDto.Email, result.UserId, result.Role);
 
             serviceResult.StatusCode = ResultStatusCode.Success;
             serviceResult.Data = new JwtResponseDto { Token = token };
+
+            _logger.LogInformation("Registration succeeded for Email {Email}", registerDto.Email);
 
             return serviceResult;
         }
@@ -136,6 +152,48 @@ namespace Application.Services
 
             serviceResult.Message = "رمز عبور با موفقیت تغییر کرد.";
             serviceResult.StatusCode = ResultStatusCode.Success;
+
+            return serviceResult;
+        }
+        #endregion
+
+        #region GetUserRoles
+        public async Task<ServiceResult<IEnumerable<UserRolesDto>>> GetUserRolesAsync()
+        {
+            var result = new ServiceResult<IEnumerable<UserRolesDto>>();
+
+            var userRoles = await _authRepository.GetUserRolesAsync();
+            if (!userRoles.Any())
+            {
+                result.StatusCode = ResultStatusCode.NotFound;
+                result.Message = ".هیچ رولی یافت نشد";
+
+                return result;
+            }
+
+            result.StatusCode = ResultStatusCode.Success;
+            result.Data = userRoles;
+
+            return result;
+        }
+        #endregion
+
+        #region ChangeUserRole
+        public async Task<ServiceResult<string>> ChangeUserRoleAsync(RoleChangeDto roleChange)
+        {
+            var serviceResult = new ServiceResult<string>();
+
+            var result = await _authRepository.ChangeUserRoleAsync(roleChange);
+
+            if (!result.IsSucceeded)
+            {
+                serviceResult.Message = result.Errors.FirstOrDefault();
+                serviceResult.StatusCode = ResultStatusCode.NotFound;
+                return serviceResult;
+            }
+
+            serviceResult.StatusCode = ResultStatusCode.Success;
+            serviceResult.Message = ".نقش کاربر با موفقیت تغییر کرد";
 
             return serviceResult;
         }

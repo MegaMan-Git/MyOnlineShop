@@ -12,5 +12,7 @@ namespace Application.Interfaces.Services
         Task<ServiceResult<JwtResponseDto>> SignUpAsync(RegisterDto registerDto);
         Task<ServiceResult<ResetTokenResponseDto>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
         Task<ServiceResult<JwtResponseDto>> ResetPasswordAsync(ResetPasswordDto resetPassword);
+        Task<ServiceResult<string>> ChangeUserRoleAsync(RoleChangeDto roleChange);
+        Task<ServiceResult<IEnumerable<UserRolesDto>>> GetUserRolesAsync();
     }
 }

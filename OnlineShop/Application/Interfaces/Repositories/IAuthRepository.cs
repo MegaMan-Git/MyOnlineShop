@@ -9,6 +9,8 @@ namespace Application.Interfaces.Repositories
         Task<string> GeneratePasswordResetTokenAsync(ForgotPasswordDto forgotPassword);
         Task<Result> ResetPasswordAsync(ResetPasswordDto resetPassword);
         Task<Result> SignInAsync(LoginDto login);
-        Task<Result> SignUpAsync(RegisterDto register);    
+        Task<Result> SignUpAsync(RegisterDto register);
+        Task<Result> ChangeUserRoleAsync(RoleChangeDto roleChange);
+        Task<IEnumerable<UserRolesDto>> GetUserRolesAsync();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Dtos.Cart;
 using Application.Dtos.Cart.Cartitem;
+using Application.Filters;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
@@ -19,9 +20,11 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Get AllCart&CartItem
-        public async Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync()
+        public async Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync
+            (QueryStringParameters parameters)
         {
-            return await (
+            #region Lazy Query
+            var carts = 
                 from cart in _context.Carts
                 join user in _context.Users
                     on cart.UserId equals user.Id
@@ -29,12 +32,31 @@ namespace Infrastructure.Repositories
                 {
                     Id = cart.Id,
                     UserName = user.UserName
-                }).ToListAsync();
+                };
+            #endregion
+
+            #region Sorting 
+            carts = 
+                parameters.SortDirection == "asc" ? 
+                    carts.OrderBy(c => c.UserName).ThenBy(c => c.Id) : 
+                    carts.OrderByDescending(c => c.UserName).ThenByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            carts = carts
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await carts.ToListAsync();
         }
 
-        public async Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync()
+        public async Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync
+            (QueryStringParameters parameters)
         {
-            return await (
+            #region Lazy Query
+            var cartItems =
                 from cart in _context.Carts
                 join cartitem in _context.CartItems
                     on cart.Id equals cartitem.CartId
@@ -42,6 +64,7 @@ namespace Infrastructure.Repositories
                     on cartitem.ProductId equals product.Id
                 join user in _context.Users
                     on cart.UserId equals user.Id
+                where product.IsDeleted == false
                 select new AdminCartItemDto
                 {
                     Id = cartitem.Id,
@@ -50,7 +73,24 @@ namespace Infrastructure.Repositories
                     ProductName = product.ProductName,
                     UserName = user.UserName,
                     Quantity = cartitem.Quantity
-                }).ToListAsync();
+                };
+            #endregion
+
+            #region Sorting 
+            cartItems =
+                parameters.SortDirection == "asc" ?
+                    cartItems.OrderBy(ci => ci.UserName).ThenBy(ci => ci.Id) : 
+                    cartItems.OrderByDescending(ci => ci.UserName).ThenByDescending(ci => ci.Id);
+            #endregion
+
+            #region Pagination
+            cartItems = cartItems
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //exectue and return
+            return await cartItems.ToListAsync();
         }
         #endregion
 
@@ -58,8 +98,16 @@ namespace Infrastructure.Repositories
         public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)
         {    
             return await _context.CartItems
-                .AsNoTracking()
                 .Where(ci => ci.CartId == cartId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<CartItem>> GetCartItemsByProductIdAsync(int productId)
+        {
+            return await _context.CartItems
+                .Where(ci => ci.ProductId == productId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -74,6 +122,7 @@ namespace Infrastructure.Repositories
         {
             return await _context.CartItems
                 .AsNoTracking()
+                .Include(p => p.Product)
                 .FirstOrDefaultAsync(ci => ci.Id == cartItemId && ci.CartId == cartId);
         }
 
@@ -98,7 +147,7 @@ namespace Infrastructure.Repositories
                     Price = product.Price,
                     TotalPrice = product.Price * cartitem.Quantity
                 }
-                ).FirstOrDefaultAsync();
+                ).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<CartItem?> GetCartItemByProductIdAsync(int cartId, int productId)
@@ -124,7 +173,7 @@ namespace Infrastructure.Repositories
                     Quantity = cartitem.Quantity,
                     Price = product.Price,
                     TotalPrice = product.Price * cartitem.Quantity
-                }).ToListAsync();
+                }).AsNoTracking().ToListAsync();
         }
 
         #endregion
@@ -148,15 +197,15 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region Delete Cart&CartItem
-        public async Task DeleteCartAsync(Cart cart)
-        {
-            _context.Carts.Remove(cart);
-        }
-
+        #region Delete CartItem
         public async Task DeleteCartItemAsync(CartItem cartItem)
         {
             _context.CartItems.Remove(cartItem);
+        }
+
+        public async Task DeleteCartItemsAsync(IEnumerable<CartItem> cartItems)
+        {
+            _context.CartItems.RemoveRange(cartItems);
         }
         #endregion
     }

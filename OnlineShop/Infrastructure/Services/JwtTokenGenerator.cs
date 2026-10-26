@@ -17,17 +17,19 @@ namespace Infrastructure.Services
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email,string userId)
+        public string GenerateToken(string email, string userId, string role)
         {
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Authentication:SecretKey"]!));
             
             var signingCredentials = new SigningCredentials(securityKey,SecurityAlgorithms.HmacSha256);
 
-            List<Claim> claim = new();
-
-            claim.Add(new Claim(ClaimTypes.Email, email));
-            claim.Add(new Claim(ClaimTypes.NameIdentifier, userId));
+            List<Claim> claim = new()
+            {
+               new(ClaimTypes.Email, email),
+               new(ClaimTypes.NameIdentifier, userId),
+               new(ClaimTypes.Role, role)
+            }; 
 
             var jwtSecurityToken = new JwtSecurityToken(
                 _configuration["Authentication:Issuer"],

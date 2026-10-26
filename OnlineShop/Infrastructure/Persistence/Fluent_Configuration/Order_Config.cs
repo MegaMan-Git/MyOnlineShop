@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -13,11 +14,19 @@ namespace Infrastructure.Persistence.Fluent_Configuration
         {
             // Order 1 <--> N OrderItem
             builder
-                .HasMany(o => o.orderItems)
+                .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
                  //If the order is deleted, then the order items will be deleted.
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(o => o.Status)
+                .HasConversion<string>()
+                .HasMaxLength(30)
+                .HasDefaultValue(OrderStatus.AwaitingPayment);
+
+            builder.Property(o => o.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())");
         }
     }
 }

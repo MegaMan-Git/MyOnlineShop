@@ -37,7 +37,7 @@ namespace Application.AutoMapper
 
             //order
             CreateMap<Payment, PaymentDto>()
-                .ForMember(pd => pd.Status,p => p.MapFrom(src => Enum.Parse<PaymentStatus>(src.Status)));
+                .ForMember(pd => pd.Status,p => p.MapFrom(src => Enum.Parse<PaymentStatus>(src.Status, true)));
         }
     }
 }

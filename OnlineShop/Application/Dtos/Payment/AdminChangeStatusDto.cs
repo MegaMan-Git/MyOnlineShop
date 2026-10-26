@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Application.Dtos.Payment
 {
-    public class AdminChangeStatusDto
+    public class ChangePaymentStatusDto
     {
         public int OrderId { get; set; }
         public string Status{ get; set; } = string.Empty;

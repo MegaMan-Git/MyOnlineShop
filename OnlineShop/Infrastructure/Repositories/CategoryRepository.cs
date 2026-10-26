@@ -1,5 +1,7 @@
 ﻿using Application.Entities;
+using Application.Filters;
 using Application.Interfaces.Repositories;
+using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,18 +19,37 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region GetCategory
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync
+            (QueryStringParameters parameters)
         {
-            return await _context.Categories
+            #region Lazy Query
+            var categories = _context.Categories
                 .AsNoTracking()
-                .ToListAsync();
+                .Where(c => c.IsDeleted == false);
+            #endregion
+
+            #region Sorting 
+            categories =
+                parameters.SortDirection == "asc" ?
+                    categories.OrderBy(c => c.Title).ThenBy(c => c.Id) : 
+                    categories.OrderByDescending(c => c.Title).ThenByDescending(c => c.Id);
+            #endregion
+
+            #region Pagination
+            categories = categories
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize);
+            #endregion
+
+            //execute and return
+            return await categories.ToListAsync();
         }
 
         public async Task<Category?> GetCategoryByIdAsync(int id)
         {
             return await _context.Categories
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id && c.IsDeleted == false);
         }
         #endregion
 
@@ -46,18 +67,17 @@ namespace Infrastructure.Repositories
         }
         #endregion
 
-        #region DeleteCategory
-        public async Task DeleteCategoryAsync(Category category)
-        {
-            _context.Categories.Remove(category);
-        }
-        #endregion
-
         #region IsDuplicateCategoryName
-        public async Task<bool> IsDuplicateCategoryNameAsync(string newCategoryName)
+        public async Task<bool> IsDuplicateCategoryNameAsync(string categoryName)
         {
             return await _context.Categories
-                .AnyAsync(c => c.Title == newCategoryName);
+                .AnyAsync(c => c.Title == categoryName);
+        }
+
+        public async Task<bool> IsDuplicateCategoryNameAsync(string categoryName, int categoryId)
+        {
+            return await _context.Categories
+                .AnyAsync(c => c.Title == categoryName && c.Id != categoryId);
         }
         #endregion
     }

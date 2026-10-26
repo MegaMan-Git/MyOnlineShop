@@ -16,7 +16,7 @@ namespace Application.Validators.Auth
 
             RuleFor(p => p.Password).Cascade(CascadeMode.Stop)
                 .NotEmpty().WithMessage(".لطفا رمز را وارد کنید")
-                .MinimumLength(6).WithMessage(".رمز کوتاه هست");
+                .MinimumLength(6).WithMessage(".رمز باید حداقل شامل 6 کاراکتر باشد");
         }
     }
 }
