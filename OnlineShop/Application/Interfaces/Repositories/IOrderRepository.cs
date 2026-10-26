@@ -12,14 +12,14 @@ namespace Application.Interfaces.Repositories
             (QueryStringParameters parameters);
         Task<IEnumerable<AdminOrderItemDto>> GetAllOrderItemsForAdminAsync
             (QueryStringParameters parameters);
-        
+
         //get for admin
         Task<AdminOrderDto?> GetOrderForAdminAsync(int orderId);
 
         //get list
         Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync(int orderId);
         Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync
-            (int orderId, QueryStringParameters parameters); 
+            (int orderId, QueryStringParameters parameters);
         Task<IEnumerable<CustomerOrderDto>> GetCustomerOrdersAsync
             (string userId, QueryStringParameters parameters);
         Task<IEnumerable<OrderItem>> GetOrderItemsIncludeProductsAsync(int orderId);

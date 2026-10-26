@@ -1,13 +1,10 @@
 ﻿using Application.Dtos.Auth;
 using Domain.Enums;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Auth
 {
-    public class RoleChangeDtoValidator: AbstractValidator<RoleChangeDto>
+    public class RoleChangeDtoValidator : AbstractValidator<RoleChangeDto>
     {
         public RoleChangeDtoValidator()
         {

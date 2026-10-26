@@ -1,5 +1,4 @@
-﻿using Application.Dtos.Cart.Cartitem;
-using Application.Dtos.Order;
+﻿using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
 using Application.Dtos.Payment;
 using Application.Filters;
@@ -10,10 +9,6 @@ using Domain.Common;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Text;
 
 namespace Application.Services
 {
@@ -122,7 +117,7 @@ namespace Application.Services
 
             var orderItemDto = await _unitOfWork.orderRepository
                 .GetOrderItemAsync(orderItemId, order.Id);
-            
+
             if (orderItemDto is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -154,7 +149,7 @@ namespace Application.Services
 
             var orderItemsDto = await _unitOfWork.orderRepository
                 .GetOrderItemsAsync(order.Id, parameters);
-            
+
             if (!orderItemsDto.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -393,9 +388,9 @@ namespace Application.Services
             };
 
             //delete cartitems
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id); 
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
             await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems);
-            
+
 
             //add order & orderitems & payment
             await _unitOfWork.orderRepository.AddOrderAsync(newOrder);
@@ -441,7 +436,7 @@ namespace Application.Services
                 return result;
             }
 
-            if(payment.Status != PaymentStatus.Waiting.ToString())
+            if (payment.Status != PaymentStatus.Waiting.ToString())
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message =
@@ -520,7 +515,7 @@ namespace Application.Services
 
                 return result;
             }
-          
+
             if (payment.Status == PaymentStatus.Completed.ToString())
             {
                 result.StatusCode = ResultStatusCode.Conflict;
@@ -541,7 +536,7 @@ namespace Application.Services
             }
 
             var verifyResult = await _paymentGateway.VerifyAsync(payment.Amount, authority);
-            
+
             if (!verifyResult.IsSuccessful)
             {
                 _logger.LogWarning(
@@ -558,11 +553,11 @@ namespace Application.Services
             #region Reduction Of Product Stock
             var orderItems = await _unitOfWork.orderRepository
                 .GetOrderItemsIncludeProductsAsync(payment.OrderId);
-            
+
             foreach (var item in orderItems)
             {
                 if (item.Product is null)
-                    throw new InvalidOperationException(".محصول سفارش یافت نشد"); 
+                    throw new InvalidOperationException(".محصول سفارش یافت نشد");
 
                 var oldStock = item.Product.Stock;
                 item.Product.Stock -= item.Quantity;
@@ -579,7 +574,7 @@ namespace Application.Services
             //change order and payment status
             payment.Status = PaymentStatus.Completed.ToString();
             payment.Order?.Status = OrderStatus.Paid;
-            
+
             payment.ReferenceId = verifyResult.ReferenceId;
             await _unitOfWork.SaveChangesAsync();
 
@@ -667,15 +662,15 @@ namespace Application.Services
             else if (status is PaymentStatus.Waiting && order.Payment.Status == PaymentStatus.Expired.ToString())
             {
                 order.Status = OrderStatus.AwaitingPayment;
-            } 
+            }
             else
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = "Waiting, Expired :مقدار ارسالی باید شامل یکی از این دو مورد باشد";
 
                 return result;
-            } 
-            
+            }
+
             //change payment status and savechanges
             order.Payment.Status = status.ToString();
             await _unitOfWork.SaveChangesAsync();
@@ -693,7 +688,7 @@ namespace Application.Services
             var result = new ServiceResult<AdminOrderDto>();
 
             var order = await _unitOfWork.orderRepository.GetOrderByIdAsync(changeOrderStatus.OrderId);
-            if(order is null)
+            if (order is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".شناسه سفارش یافت نشد";
@@ -710,25 +705,25 @@ namespace Application.Services
                  !(status is OrderStatus.Cancelled || status is OrderStatus.Paid))
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = 
+                result.Message =
                     ".نمیتوانید وضعیت سفارش را از در انتظار پرداخت به چیزی به غیر از لغو شده یا پرداخت شده تغییر دهید";
 
                 return result;
-            } 
-            if(order.Status is OrderStatus.AwaitingPayment && status is OrderStatus.Paid)
+            }
+            if (order.Status is OrderStatus.AwaitingPayment && status is OrderStatus.Paid)
             {
                 #region Reduction Of Product Stock
                 var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
 
-                foreach(var item in orderItems)
+                foreach (var item in orderItems)
                 {
-                    if(item.Product is null)
+                    if (item.Product is null)
                         throw new InvalidOperationException(".محصول سفارش یافت نشد");
 
                     if (item.Product.IsDeleted is true)
-                    { 
+                    {
                         result.StatusCode = ResultStatusCode.NotFound;
-                        result.Message = 
+                        result.Message =
                             ".سفارش نمیتواند تکمیل شود زیرا حداقل یکی از محصولا دیگر در فروشگاه وجود ندارد";
 
                         return result;
@@ -737,7 +732,7 @@ namespace Application.Services
                     {
                         result.StatusCode = ResultStatusCode.BadRequest;
                         result.Message = ".موجودی محصول کافی نیست";
-                     
+
                         return result;
                     }
 
@@ -750,16 +745,16 @@ namespace Application.Services
             }
             else if (status is OrderStatus.Cancelled)
             {
-                if(order.Payment?.Status == PaymentStatus.Completed.ToString())
+                if (order.Payment?.Status == PaymentStatus.Completed.ToString())
                 {
                     #region Return Stock To Product
                     var orderItems = await _unitOfWork.orderRepository.GetOrderItemsIncludeProductsAsync(order.Id);
-                
-                    foreach(var item in orderItems)
+
+                    foreach (var item in orderItems)
                     {
                         if (item.Product is null)
                             throw new InvalidOperationException(".محصول سفارش یافت نشد");
-                        
+
                         var oldStock = item.Product.Stock;
                         item.Product.Stock += item.Quantity;
 
@@ -773,12 +768,12 @@ namespace Application.Services
                     #endregion
                 }
 
-                order.Payment?.Status = PaymentStatus.Expired.ToString();                
+                order.Payment?.Status = PaymentStatus.Expired.ToString();
             }
-            else if(status is OrderStatus.AwaitingPayment)
+            else if (status is OrderStatus.AwaitingPayment)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = 
+                result.Message =
                     "Processing, Shipped, Delivered, Cancelled :مقدار ارسالی باید شامل یکی از این موارد باشد";
 
                 return result;

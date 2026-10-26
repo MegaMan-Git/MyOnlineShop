@@ -3,14 +3,8 @@ using Application.Interfaces;
 using Application.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Win32;
-using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
-using System.Net;
 
 namespace OnlineShop.Api.Controllers
 {
@@ -95,12 +89,12 @@ namespace OnlineShop.Api.Controllers
         public async Task<ActionResult> ForgotPasswordAsync(ForgotPasswordDto forgotPassword)
         {
             var result = await ValidateModelAsync<ResetTokenResponseDto, ForgotPasswordDto>(forgotPassword);
-            
-            if(result.StatusCode == ResultStatusCode.Success)
+
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _authService.ForgotPasswordAsync(forgotPassword);
             }
-            
+
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -134,8 +128,8 @@ namespace OnlineShop.Api.Controllers
         public async Task<ActionResult> UpdateUserRole(RoleChangeDto roleChange)
         {
             var result = await ValidateModelAsync<string, RoleChangeDto>(roleChange);
-         
-            if(result.StatusCode == ResultStatusCode.Success)
+
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _authService.ChangeUserRoleAsync(roleChange);
             }

@@ -1,8 +1,6 @@
 ﻿using Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -21,15 +19,15 @@ namespace Infrastructure.Services
         {
             var securityKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_configuration["Authentication:SecretKey"]!));
-            
-            var signingCredentials = new SigningCredentials(securityKey,SecurityAlgorithms.HmacSha256);
+
+            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             List<Claim> claim = new()
             {
                new(ClaimTypes.Email, email),
                new(ClaimTypes.NameIdentifier, userId),
                new(ClaimTypes.Role, role)
-            }; 
+            };
 
             var jwtSecurityToken = new JwtSecurityToken(
                 _configuration["Authentication:Issuer"],

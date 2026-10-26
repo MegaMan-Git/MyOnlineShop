@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Dtos.Auth
+﻿namespace Application.Dtos.Auth
 {
     public class JwtResponseDto
     {
-        public string Token {  get; set; } = string.Empty;
+        public string Token { get; set; } = string.Empty;
     }
 }

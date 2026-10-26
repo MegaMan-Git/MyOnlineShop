@@ -1,9 +1,6 @@
 ﻿using Application.Dtos.Category;
 using Application.Filters;
 using Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Interfaces.Services
 {

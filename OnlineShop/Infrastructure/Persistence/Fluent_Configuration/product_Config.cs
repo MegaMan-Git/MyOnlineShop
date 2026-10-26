@@ -1,10 +1,6 @@
-﻿using Application.Entities;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Persistence.Fluent_Configuration
 {
@@ -18,7 +14,7 @@ namespace Infrastructure.Persistence.Fluent_Configuration
                  .WithMany(c => c.Products)
                  .HasForeignKey(p => p.CategoryId)
                  .OnDelete(DeleteBehavior.Restrict);
-        
+
             // Product 1 <--> N CartItem
             builder
                 .HasMany(p => p.CartItems)

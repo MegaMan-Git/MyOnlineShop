@@ -29,7 +29,7 @@ namespace Infrastructure.Repositories
             #region Sorting 
             products =
                 parameters.SortDirection == "asc" ?
-                    products.OrderBy(c => c.ProductName).ThenBy(c => c.Id) : 
+                    products.OrderBy(c => c.ProductName).ThenBy(c => c.Id) :
                     products.OrderByDescending(c => c.ProductName).ThenByDescending(c => c.Id);
             #endregion
 

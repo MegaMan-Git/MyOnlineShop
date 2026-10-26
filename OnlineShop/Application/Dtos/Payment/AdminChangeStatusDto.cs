@@ -1,13 +1,8 @@
-﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Dtos.Payment
+﻿namespace Application.Dtos.Payment
 {
     public class ChangePaymentStatusDto
     {
         public int OrderId { get; set; }
-        public string Status{ get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
     }
 }

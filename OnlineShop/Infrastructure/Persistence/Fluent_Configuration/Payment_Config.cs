@@ -1,10 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Persistence.Fluent_Configuration
 {
@@ -16,7 +12,7 @@ namespace Infrastructure.Persistence.Fluent_Configuration
             builder
                 .HasOne(p => p.Order)
                 .WithOne(o => o.Payment)
-                .HasForeignKey<Payment>(p=>p.OrderId)
+                .HasForeignKey<Payment>(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 

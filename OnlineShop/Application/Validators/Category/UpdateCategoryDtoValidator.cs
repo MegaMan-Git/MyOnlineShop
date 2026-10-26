@@ -1,12 +1,9 @@
 ﻿using Application.Dtos.Category;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Category
 {
-    public class UpdateCategoryDtoValidator: AbstractValidator<UpdateCategoryDto>
+    public class UpdateCategoryDtoValidator : AbstractValidator<UpdateCategoryDto>
     {
         public UpdateCategoryDtoValidator()
         {

@@ -2,14 +2,9 @@
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Interfaces.UnitOfWork;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Application.Services
 {
@@ -139,14 +134,14 @@ namespace Application.Services
 
             //reset password
             var result = await _authRepository.ResetPasswordAsync(resetPassword);
-           
+
             // check result
-            if(result.IsSucceeded is false)
+            if (result.IsSucceeded is false)
             {
                 serviceResult.Message = "تغییر رمز عبور انجام نشد.";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
                 serviceResult.Errors = result.Errors;
-            
+
                 return serviceResult;
             }
 

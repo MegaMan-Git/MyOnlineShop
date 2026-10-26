@@ -1,13 +1,10 @@
 ﻿using Application.Dtos.Payment;
 using Domain.Enums;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Payment
 {
-    public class ChangePaymentStatusDtoValidator: AbstractValidator<ChangePaymentStatusDto>
+    public class ChangePaymentStatusDtoValidator : AbstractValidator<ChangePaymentStatusDto>
     {
         public ChangePaymentStatusDtoValidator()
         {

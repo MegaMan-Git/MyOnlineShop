@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Filters
+﻿namespace Application.Filters
 {
     public class QueryStringParameters
     {
@@ -10,16 +6,16 @@ namespace Application.Filters
         private const int _maxPageSize = 20;
         private string _sortDirection = "asc";
         public int PageNumber { get; set; } = 1;
-        
-        public int PageSize 
+
+        public int PageSize
         {
             get => _pageSize;
             set => _pageSize = Math.Min(Math.Max(1, value), _maxPageSize);
         }
-        public string SortDirection 
+        public string SortDirection
         {
             get => _sortDirection;
-            set => _sortDirection = value?.Trim().ToLower() == "desc" ? "desc" : "asc"; 
+            set => _sortDirection = value?.Trim().ToLower() == "desc" ? "desc" : "asc";
         }
     }
 }

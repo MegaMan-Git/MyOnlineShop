@@ -1,12 +1,9 @@
 using Application.Dtos.Auth;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Auth
 {
-    public class ForgotPasswordDtoValidator: AbstractValidator<ForgotPasswordDto>
+    public class ForgotPasswordDtoValidator : AbstractValidator<ForgotPasswordDto>
     {
         public ForgotPasswordDtoValidator()
         {

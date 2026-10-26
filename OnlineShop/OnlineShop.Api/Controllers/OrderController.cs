@@ -1,14 +1,11 @@
 ﻿using Application.Dtos.Order;
 using Application.Dtos.Payment;
+using Application.Filters;
 using Application.Interfaces;
 using Application.Interfaces.Services;
-using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
-using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -72,7 +69,7 @@ namespace OnlineShop.Api.Controllers
             ([FromQuery] QueryStringParameters parameters)
         {
             var result = await _orderService.GetAllOrdersForAdminAsync(parameters);
-        
+
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -111,11 +108,11 @@ namespace OnlineShop.Api.Controllers
         }
 
         [HttpGet("{orderid}/{orderitemid}")]
-        public async Task<ActionResult> GetOrderItemAsync(int orderId,int orderItemId)
+        public async Task<ActionResult> GetOrderItemAsync(int orderId, int orderItemId)
         {
             var userId = GetUserId();
 
-            var result = await _orderService.GetOrderItemAsync(userId,orderItemId,orderId);
+            var result = await _orderService.GetOrderItemAsync(userId, orderItemId, orderId);
 
             return StatusCode((int)result.StatusCode, result);
         }
@@ -147,7 +144,7 @@ namespace OnlineShop.Api.Controllers
         public async Task<ActionResult> CreateOrderFromCartAsync()
         {
             var userId = GetUserId();
-            
+
             var result = await _orderService.CreateOrderFromCartItemsAsync(userId);
 
             return StatusCode((int)result.StatusCode, result);
@@ -158,7 +155,7 @@ namespace OnlineShop.Api.Controllers
         {
             var userId = GetUserId();
 
-            var result = await _orderService.CreateOrderFromCartItemAsync(userId,cartItemId);
+            var result = await _orderService.CreateOrderFromCartItemAsync(userId, cartItemId);
 
             return StatusCode((int)result.StatusCode, result);
         }
@@ -171,7 +168,7 @@ namespace OnlineShop.Api.Controllers
         {
             var result = await ValidateModelAsync<AdminOrderDto, ChangeOrderStatusDto>(changeOrderStatus);
 
-            if(result.StatusCode == ResultStatusCode.Success)
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _orderService.UpdateOrderStatusAsync(changeOrderStatus);
             }
@@ -185,7 +182,7 @@ namespace OnlineShop.Api.Controllers
         {
             var result = await ValidateModelAsync<PaymentDto, ChangePaymentStatusDto>(changePaymentStatus);
 
-            if(result.StatusCode == ResultStatusCode.Success)
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _orderService.UpdatePaymentStatusAsync(changePaymentStatus);
             }
@@ -201,7 +198,7 @@ namespace OnlineShop.Api.Controllers
         {
             var userId = GetUserId();
 
-            var callbackUrl =$"{Request.Scheme}://{Request.Host}/api/order/payment/callback";
+            var callbackUrl = $"{Request.Scheme}://{Request.Host}/api/order/payment/callback";
 
             var result = await _orderService.StartPaymentAsync(userId, orderId, callbackUrl);
 

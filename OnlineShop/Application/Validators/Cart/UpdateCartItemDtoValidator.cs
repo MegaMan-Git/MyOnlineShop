@@ -1,12 +1,9 @@
 ﻿using Application.Dtos.Cart.Cartitem;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Cart
 {
-    public class UpdateCartItemDtoValidator: AbstractValidator<UpdateCartItemDto>
+    public class UpdateCartItemDtoValidator : AbstractValidator<UpdateCartItemDto>
     {
         public UpdateCartItemDtoValidator()
         {

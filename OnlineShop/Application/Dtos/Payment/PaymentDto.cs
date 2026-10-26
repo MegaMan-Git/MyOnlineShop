@@ -1,7 +1,4 @@
 ﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Dtos.Payment
 {
@@ -13,6 +10,6 @@ namespace Application.Dtos.Payment
         public PaymentStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? Authority { get; set; }
-        public string? ReferenceId {  get; set; }
+        public string? ReferenceId { get; set; }
     }
 }

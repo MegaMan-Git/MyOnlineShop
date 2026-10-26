@@ -1,6 +1,5 @@
 using Domain.Common;
 using Domain.Enums;
-using System.Text.Json;
 
 namespace OnlineShop.Api.Middlewares;
 

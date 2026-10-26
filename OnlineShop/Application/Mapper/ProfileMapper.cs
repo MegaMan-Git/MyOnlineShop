@@ -1,14 +1,10 @@
-﻿using Application.Dtos.Cart.Cartitem;
-using Application.Dtos.Category;
+﻿using Application.Dtos.Category;
 using Application.Dtos.Payment;
 using Application.Dtos.Product;
 using Application.Entities;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.AutoMapper
 {
@@ -37,7 +33,7 @@ namespace Application.AutoMapper
 
             //order
             CreateMap<Payment, PaymentDto>()
-                .ForMember(pd => pd.Status,p => p.MapFrom(src => Enum.Parse<PaymentStatus>(src.Status, true)));
+                .ForMember(pd => pd.Status, p => p.MapFrom(src => Enum.Parse<PaymentStatus>(src.Status, true)));
         }
     }
 }

@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Security;
 
 namespace Infrastructure.Repositories
 {
@@ -19,18 +18,18 @@ namespace Infrastructure.Repositories
 
         }
         #endregion
-        
+
         #region Get AllOrders&OrderItems
         public async Task<IEnumerable<AdminOrderDto>> GetAllOrdersForAdminAsync
             (QueryStringParameters parameters)
         {
             #region Lazy Query
-            var orders = 
+            var orders =
                 from order in _context.Orders
                 join payment in _context.Payments
                     on order.Id equals payment.OrderId
                 join user in _context.Users
-                    on order.UserId equals user.Id              
+                    on order.UserId equals user.Id
                 select new AdminOrderDto
                 {
                     OrderId = order.Id,
@@ -110,16 +109,16 @@ namespace Infrastructure.Repositories
                     on order.UserId equals user.Id
                 join payment in _context.Payments
                     on order.Id equals payment.OrderId
-                    where order.Id == Orderid
+                where order.Id == Orderid
                 select new AdminOrderDto
-                    {
-                        OrderId = order.Id,
-                        UserName= user.UserName,
-                        Status = order.Status,
-                        CreatedAt = order.CreatedAt,
-                        Authority = payment.Authority,
-                        ReferenceId = payment.ReferenceId
-                    }).AsNoTracking().FirstOrDefaultAsync();
+                {
+                    OrderId = order.Id,
+                    UserName = user.UserName,
+                    Status = order.Status,
+                    CreatedAt = order.CreatedAt,
+                    Authority = payment.Authority,
+                    ReferenceId = payment.ReferenceId
+                }).AsNoTracking().FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<CustomerOrderItemDto>> GetOrderItemsAsync(int orderId)
@@ -290,7 +289,7 @@ namespace Infrastructure.Repositories
                     TotalPrice = orderitem.UnitPrice * orderitem.Quantity,
                     Quantity = orderitem.Quantity
                 }).AsNoTracking().FirstOrDefaultAsync();
-        } 
+        }
 
         public async Task<Payment?> GetPaymentAsync(int orderId)
         {
@@ -317,7 +316,7 @@ namespace Infrastructure.Repositories
         public async Task UpdateOrderAsync(Order order)
         {
             _context.Orders.Update(order);
-        } 
+        }
         #endregion
     }
 }

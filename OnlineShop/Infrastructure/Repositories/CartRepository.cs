@@ -24,7 +24,7 @@ namespace Infrastructure.Repositories
             (QueryStringParameters parameters)
         {
             #region Lazy Query
-            var carts = 
+            var carts =
                 from cart in _context.Carts
                 join user in _context.Users
                     on cart.UserId equals user.Id
@@ -36,9 +36,9 @@ namespace Infrastructure.Repositories
             #endregion
 
             #region Sorting 
-            carts = 
-                parameters.SortDirection == "asc" ? 
-                    carts.OrderBy(c => c.UserName).ThenBy(c => c.Id) : 
+            carts =
+                parameters.SortDirection == "asc" ?
+                    carts.OrderBy(c => c.UserName).ThenBy(c => c.Id) :
                     carts.OrderByDescending(c => c.UserName).ThenByDescending(c => c.Id);
             #endregion
 
@@ -79,7 +79,7 @@ namespace Infrastructure.Repositories
             #region Sorting 
             cartItems =
                 parameters.SortDirection == "asc" ?
-                    cartItems.OrderBy(ci => ci.UserName).ThenBy(ci => ci.Id) : 
+                    cartItems.OrderBy(ci => ci.UserName).ThenBy(ci => ci.Id) :
                     cartItems.OrderByDescending(ci => ci.UserName).ThenByDescending(ci => ci.Id);
             #endregion
 
@@ -96,7 +96,7 @@ namespace Infrastructure.Repositories
 
         #region Get Cart&CartItems
         public async Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId)
-        {    
+        {
             return await _context.CartItems
                 .Where(ci => ci.CartId == cartId)
                 .AsNoTracking()
@@ -116,7 +116,7 @@ namespace Infrastructure.Repositories
             return await _context.Carts
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.UserId == userId);
-        }  
+        }
 
         public async Task<CartItem?> GetCartItemAsync(int cartItemId, int cartId)
         {

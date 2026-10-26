@@ -1,9 +1,6 @@
 ﻿using Application.Dtos.Order;
 using Domain.Enums;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Order
 {

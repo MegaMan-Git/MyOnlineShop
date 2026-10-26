@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Domain.Common
 {
@@ -20,6 +17,6 @@ namespace Domain.Common
         public string? Message { get; set; }
 
         [JsonPropertyName("authority")]
-        public string? Authority { get; set; }     
+        public string? Authority { get; set; }
     }
 }

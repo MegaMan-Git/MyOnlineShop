@@ -1,7 +1,6 @@
 ﻿using Application.Entities;
 using Application.Filters;
 using Application.Interfaces.Repositories;
-using Domain.Entities;
 using Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +30,7 @@ namespace Infrastructure.Repositories
             #region Sorting 
             categories =
                 parameters.SortDirection == "asc" ?
-                    categories.OrderBy(c => c.Title).ThenBy(c => c.Id) : 
+                    categories.OrderBy(c => c.Title).ThenBy(c => c.Id) :
                     categories.OrderByDescending(c => c.Title).ThenByDescending(c => c.Id);
             #endregion
 

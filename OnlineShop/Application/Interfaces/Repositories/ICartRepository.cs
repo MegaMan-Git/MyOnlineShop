@@ -10,7 +10,7 @@ namespace Application.Interfaces.Repositories
         //admin
         Task<IEnumerable<AdminCartDto>> GetAllCartsForAdminAsync(QueryStringParameters parameters);
         Task<IEnumerable<AdminCartItemDto>> GetAllCartItemsForAdminAsync(QueryStringParameters parameters);
-        
+
         //list
         Task<IEnumerable<CustomerCartItemDto>> GetCustomerCartItemsAsync(int cartId);
         Task<IEnumerable<CartItem>> GetCartItemsAsync(int cartId);
@@ -19,16 +19,16 @@ namespace Application.Interfaces.Repositories
         //one
         Task<Cart?> GetCartAsync(string userId);
         Task<CartItem?> GetCartItemAsync(int cartItemId, int cartId);
-        Task<CustomerCartItemDto?> GetCustomerCartItemDtoAsync(string userId,int cartItemId);
-        Task<CartItem?>GetCartItemByProductIdAsync(int cartId,int productId);
-       
+        Task<CustomerCartItemDto?> GetCustomerCartItemDtoAsync(string userId, int cartItemId);
+        Task<CartItem?> GetCartItemByProductIdAsync(int cartId, int productId);
+
         //add
         Task AddCartAsync(Cart cart);
         Task AddCartItemAsync(CartItem cartItem);
-        
+
         //update
         Task UpdateCartItemAsync(CartItem cartItem);
-        
+
         //delete
         Task DeleteCartItemAsync(CartItem cartItem);
         Task DeleteCartItemsAsync(IEnumerable<CartItem> cartItems);

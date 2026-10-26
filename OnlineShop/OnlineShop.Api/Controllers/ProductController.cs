@@ -1,13 +1,11 @@
 ﻿using Application.Dtos.Product;
+using Application.Filters;
 using Application.Interfaces;
 using Application.Interfaces.Services;
-using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.WebSockets;
 
 namespace OnlineShop.Api.Controllers
 {
@@ -58,7 +56,7 @@ namespace OnlineShop.Api.Controllers
             ([FromQuery] QueryStringParameters parameters)
         {
             var result = await _productService.GetAllProductsAsync(parameters);
-            
+
             return StatusCode((int)result.StatusCode, result);
         }
 
@@ -68,7 +66,7 @@ namespace OnlineShop.Api.Controllers
         {
             var result = await _productService.GetProductByIdAsync(id);
 
-            return StatusCode((int)result.StatusCode,result);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         #endregion
@@ -80,7 +78,7 @@ namespace OnlineShop.Api.Controllers
         {
             var result = await ValidateModelAsync<ProductDto, AddProductDto>(product);
 
-            if(result.StatusCode == ResultStatusCode.Success)
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _productService.AddProductAsync(product);
             }

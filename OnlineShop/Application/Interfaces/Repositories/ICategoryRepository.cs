@@ -11,10 +11,10 @@ namespace Application.Interfaces.Repositories
 
         //add
         Task AddCategoryAsync(Category category);
-        
+
         //update
-        Task UpdateCategoryAsync(Category category); 
-        
+        Task UpdateCategoryAsync(Category category);
+
         //check
         Task<bool> IsDuplicateCategoryNameAsync(string categoryName);
         Task<bool> IsDuplicateCategoryNameAsync(string categoryName, int categoryId);

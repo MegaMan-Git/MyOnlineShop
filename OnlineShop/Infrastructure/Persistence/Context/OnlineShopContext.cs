@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Application.Entities;
+﻿using Application.Entities;
 using Domain.Entities;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Fluent_Configuration;
@@ -166,7 +164,7 @@ public partial class OnlineShopContext : IdentityDbContext<ApplicationUser, Appl
             .HasData(new IdentityUserRole<string>
             {
                 UserId = "11111111-1111-1111-1111-111111111111",
-                RoleId = "1" 
+                RoleId = "1"
             });
         #endregion
     }

@@ -2,9 +2,6 @@
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Persistence.Fluent_Configuration
 {
@@ -17,7 +14,7 @@ namespace Infrastructure.Persistence.Fluent_Configuration
                 .HasMany(o => o.OrderItems)
                 .WithOne(oi => oi.Order)
                 .HasForeignKey(oi => oi.OrderId)
-                 //If the order is deleted, then the order items will be deleted.
+                //If the order is deleted, then the order items will be deleted.
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(o => o.Status)

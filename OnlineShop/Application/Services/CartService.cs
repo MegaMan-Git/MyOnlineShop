@@ -1,15 +1,11 @@
 ﻿using Application.Dtos.Cart;
 using Application.Dtos.Cart.Cartitem;
+using Application.Filters;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
-using Application.Filters;
-using Domain.Entities;
 using Domain.Common;
+using Domain.Entities;
 using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Net.Security;
 
 namespace Application.Services
 {
@@ -44,12 +40,13 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<AdminCartItemDto>>> GetAllCartItemsForAdminAsync(Application.Filters.QueryStringParameters parameters)
+        public async Task<ServiceResult<IEnumerable<AdminCartItemDto>>> GetAllCartItemsForAdminAsync
+            (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<AdminCartItemDto>>();
 
-            var carItems = await _unitOfWork.cartRepository.GetAllCartItemsForAdminAsync(parameters);
-            if (!carItems.Any())
+            var cartItems = await _unitOfWork.cartRepository.GetAllCartItemsForAdminAsync(parameters);
+            if (!cartItems.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".در حال حاضر هیچ سبد خریدی توسط مشتریان ثبت نشده";
@@ -58,7 +55,7 @@ namespace Application.Services
             }
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = carItems;
+            result.Data = cartItems;
 
             return result;
         }
@@ -87,7 +84,7 @@ namespace Application.Services
             }
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = await _unitOfWork.cartRepository.GetCustomerCartItemsAsync(cart.Id);
+            result.Data = cartItems;
 
             return result;
         }
@@ -301,9 +298,9 @@ namespace Application.Services
             }
 
             //delete cartitems
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id); 
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsAsync(cart.Id);
             await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems);
-            
+
 
             await _unitOfWork.SaveChangesAsync();
 

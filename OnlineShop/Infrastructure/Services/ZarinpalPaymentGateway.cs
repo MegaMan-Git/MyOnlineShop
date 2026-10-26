@@ -2,10 +2,7 @@
 using Domain.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 
 namespace Infrastructure.Services
@@ -83,21 +80,21 @@ namespace Infrastructure.Services
             {
                 _logger.LogWarning(
                     exception, "Payment request timed out for OrderId {OrderId}", orderId);
-               
+
                 return new(false, null, null, ".زمان پاسخگویی درگاه به پایان رسید");
             }
             catch (HttpRequestException exception)
             {
                 _logger.LogError(
                     exception, "Payment gateway connection failed for OrderId {OrderId}", orderId);
-                
+
                 return new(false, null, null, ".ارتباط با درگاه برقرار نشد");
             }
             catch (JsonException exception)
             {
                 _logger.LogError(
                     exception, "Invalid payment gateway response for OrderId {OrderId}", orderId);
-                
+
                 return new(false, null, null, ".پاسخ دریافتی از درگاه معتبر نیست");
             }
 

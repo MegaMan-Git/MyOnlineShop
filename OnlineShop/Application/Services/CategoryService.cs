@@ -1,14 +1,11 @@
 ﻿using Application.Dtos.Category;
 using Application.Entities;
+using Application.Filters;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
-using Application.Filters;
 using AutoMapper;
 using Domain.Common;
 using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Services
 {
@@ -17,7 +14,7 @@ namespace Application.Services
         #region DI
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CategoryService(IUnitOfWork unitOfWork,IMapper mapper)
+        public CategoryService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -31,7 +28,7 @@ namespace Application.Services
             var result = new ServiceResult<IEnumerable<CategoryDto>>();
 
             var categories = await _unitOfWork.categoryRepository.GetAllCategoriesAsync(parameters);
-            if(!categories.Any())
+            if (!categories.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".هیچ دسته بندی در حال حاضر ثبت نشده";
@@ -48,9 +45,9 @@ namespace Application.Services
         public async Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(int categoryId)
         {
             var result = new ServiceResult<CategoryDto>();
-            
+
             var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync(categoryId);
-            if(category is null)
+            if (category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".دسته بندی مورد نظر یافت نشد";
@@ -58,7 +55,7 @@ namespace Application.Services
                 return result;
             }
 
-            result.StatusCode= ResultStatusCode.Success;
+            result.StatusCode = ResultStatusCode.Success;
             result.Data = _mapper.Map<CategoryDto>(category);
 
             return result;
@@ -101,7 +98,7 @@ namespace Application.Services
 
             //is category exist?
             var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync(categoryDto.Id);
-            if(category is null)
+            if (category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".دسته بندی مورد نظر یافت نشد";
@@ -110,14 +107,14 @@ namespace Application.Services
             }
 
             //is default category?
-            if(category.Id == -1)
+            if (category.Id == -1)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = ".نمیتوان نام دسته بندی پیشفرض را عوض کرد";
 
                 return result;
             }
-            
+
             //is category duplicate
             var isDuplicated = await _unitOfWork.categoryRepository
                 .IsDuplicateCategoryNameAsync(categoryDto.NewCategoryName, categoryDto.Id);
@@ -149,7 +146,7 @@ namespace Application.Services
             var result = new ServiceResult<string>();
 
             var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync(categoryId);
-            if(category is null)
+            if (category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
                 result.Message = ".دسته بندی یافت نشد";
@@ -158,7 +155,7 @@ namespace Application.Services
             }
 
             //you can not delete default category!
-            if(category.Id == -1)
+            if (category.Id == -1)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
                 result.Message = ".امکان حذف برای این دسته بندی وجود ندارد";
@@ -167,8 +164,8 @@ namespace Application.Services
             }
 
             //change category product to default category after delete category
-            var products = await _unitOfWork.productRepository.GetProductsByCategoryId(categoryId);            
-            foreach(var product in products)
+            var products = await _unitOfWork.productRepository.GetProductsByCategoryId(categoryId);
+            foreach (var product in products)
             {
                 product.CategoryId = -1;
             }

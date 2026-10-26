@@ -1,12 +1,8 @@
-﻿using Application.Filters;
-using Application.Dtos.Order;
+﻿using Application.Dtos.Order;
 using Application.Dtos.Order.OrderItem;
 using Application.Dtos.Payment;
+using Application.Filters;
 using Domain.Common;
-using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Interfaces.Services
 {
@@ -17,7 +13,7 @@ namespace Application.Interfaces.Services
             (QueryStringParameters parameters);
         Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync
             (QueryStringParameters parameters);
-        
+
         //get list
         Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync
             (string userId, QueryStringParameters parameters);
@@ -28,9 +24,9 @@ namespace Application.Interfaces.Services
 
         //get 
         Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync
-            (string userId,int orderItemId, int orderId);
+            (string userId, int orderItemId, int orderId);
         Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId);
-        
+
 
         //add
         Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync

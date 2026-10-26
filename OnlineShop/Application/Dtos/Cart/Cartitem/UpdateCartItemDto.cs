@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Dtos.Cart.Cartitem
+﻿namespace Application.Dtos.Cart.Cartitem
 {
     public class UpdateCartItemDto
     {

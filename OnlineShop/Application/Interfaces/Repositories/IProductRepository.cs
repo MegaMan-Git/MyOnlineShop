@@ -11,15 +11,15 @@ namespace Application.Interfaces.Repositories
 
         //get
         Task<Product?> GetProductByIdAsync(int id);
-        
+
         //add
-        Task AddProductAsync(Product product);  
-        
+        Task AddProductAsync(Product product);
+
         //update
         Task UpdateProductAsync(Product product);
-        
+
         //check
         Task<bool> IsProductNameDuplicateAsync(string productName);
-        Task<bool> IsProductNameDuplicateAsync(string productName,int productId);
+        Task<bool> IsProductNameDuplicateAsync(string productName, int productId);
     }
 }

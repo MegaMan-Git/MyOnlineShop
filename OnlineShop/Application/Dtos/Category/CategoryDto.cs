@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Dtos.Category
+﻿namespace Application.Dtos.Category
 {
     public class CategoryDto
     {
         public int Id { get; set; }
-        public string CategoryName {  get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
     }
 }

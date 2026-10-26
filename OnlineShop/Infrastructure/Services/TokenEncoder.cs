@@ -1,8 +1,5 @@
 ﻿using Application.Interfaces;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Infrastructure.Services

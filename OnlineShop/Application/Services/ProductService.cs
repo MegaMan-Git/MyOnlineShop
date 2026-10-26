@@ -1,14 +1,11 @@
 ﻿using Application.Dtos.Product;
+using Application.Filters;
 using Application.Interfaces.Services;
 using Application.Interfaces.UnitOfWork;
-using Application.Filters;
 using AutoMapper;
 using Domain.Common;
-using Domain.Enums;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Enums;
 
 namespace Application.Services
 {
@@ -177,8 +174,8 @@ namespace Application.Services
             }
 
             //delete cartitems include product
-            var cartItems = await _unitOfWork.cartRepository.GetCartItemsByProductIdAsync(product.Id); 
-            await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems); 
+            var cartItems = await _unitOfWork.cartRepository.GetCartItemsByProductIdAsync(product.Id);
+            await _unitOfWork.cartRepository.DeleteCartItemsAsync(cartItems);
 
 
             //softdelete product and savechanges

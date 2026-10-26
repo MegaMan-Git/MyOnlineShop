@@ -1,7 +1,6 @@
 ﻿using Application.Dtos.Auth;
 using Application.Interfaces.Repositories;
 using Domain.Common;
-using Domain.Enums;
 using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Identity;
@@ -129,7 +128,7 @@ namespace Infrastructure.Repositories
 
             //create user
             var identityResult = await _userManager.CreateAsync(user, register.Password);
-            
+
             //return result
             if (!identityResult.Succeeded)
             {
@@ -201,7 +200,7 @@ namespace Infrastructure.Repositories
                 result.IsSucceeded = false;
                 result.Errors.AddRange(
                     identitiyResult.Errors.Select(e => e.Description));
-                
+
                 return result;
             }
 

@@ -1,13 +1,10 @@
 ﻿using Application.Dtos.Cart.Cartitem;
-using Application.Interfaces;
 using Application.Filters;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Domain.Common;
 using Domain.Enums;
-using Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -33,7 +30,7 @@ namespace OnlineShop.Api.Controllers
         private string GetUserId()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             return userId!;
         }
         #endregion
@@ -100,7 +97,7 @@ namespace OnlineShop.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCartItemAsync(int id)
         {
-            var userId =  GetUserId();
+            var userId = GetUserId();
 
             var result = await _cartService.GetCustomerCartItemAsync(userId, id);
 
@@ -116,7 +113,7 @@ namespace OnlineShop.Api.Controllers
 
             var result = await ValidateModelAsync<CustomerCartItemDto, AddCartItemDto>(cartItemDto);
 
-            if(result.StatusCode == ResultStatusCode.Success)
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _cartService.AddCartItemAsync(userId, cartItemDto);
             }
@@ -147,7 +144,7 @@ namespace OnlineShop.Api.Controllers
         public async Task<ActionResult> DeleteCartItemsAsync()
         {
             var userId = GetUserId();
-            
+
             var result = await _cartService.ClearCartItemsAsync(userId);
 
             return StatusCode((int)result.StatusCode, result);
@@ -156,7 +153,7 @@ namespace OnlineShop.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCartItemAsync(int id)
         {
-            var userId = GetUserId(); 
+            var userId = GetUserId();
 
             var result = await _cartService.DeleteCartItemAsync(userId, id);
 

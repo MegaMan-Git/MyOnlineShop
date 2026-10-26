@@ -1,12 +1,9 @@
 ﻿using Application.Dtos.Product;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Validators.Product
 {
-    public class UpdateProductDtoValidator: AbstractValidator<UpdateProductDto>
+    public class UpdateProductDtoValidator : AbstractValidator<UpdateProductDto>
     {
         public UpdateProductDtoValidator()
         {

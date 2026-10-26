@@ -1,11 +1,10 @@
 ﻿using Application.Dtos.Category;
+using Application.Filters;
 using Application.Interfaces;
 using Application.Interfaces.Services;
-using Application.Filters;
 using Domain.Common;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineShop.Api.Controllers
@@ -78,12 +77,12 @@ namespace OnlineShop.Api.Controllers
         {
             var result = await ValidateModelAsync<CategoryDto, AddCategoryDto>(category);
 
-            if(result.StatusCode == ResultStatusCode.Success)
+            if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _categoryService.AddCategoryAsync(category);
             }
 
-            return StatusCode((int)result.StatusCode, result); 
+            return StatusCode((int)result.StatusCode, result);
         }
         #endregion
 
