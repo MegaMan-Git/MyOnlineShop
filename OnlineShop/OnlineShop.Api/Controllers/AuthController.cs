@@ -131,7 +131,7 @@ namespace OnlineShop.Api.Controllers
         [HttpPut("resetpassword")]
         public async Task<ActionResult> ResetPasswordAsync(ResetPasswordDto resetPassword)
         {
-            var result = await ValidateModelAsync<JwtResponseDto, ResetPasswordDto>(resetPassword);
+            var result = await ValidateModelAsync<string, ResetPasswordDto>(resetPassword);
             if (result.StatusCode == ResultStatusCode.Success)
             {
                 result = await _authService.ResetPasswordAsync(resetPassword);
