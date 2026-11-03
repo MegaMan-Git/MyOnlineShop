@@ -11,6 +11,9 @@ using System.Security.Claims;
 
 namespace OnlineShop.Api.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به مدیریت سفارش ها و پرداخت ها
+    /// </summary>
     [Route("api/order")]
     [ApiController]
     [Authorize]
@@ -20,6 +23,11 @@ namespace OnlineShop.Api.Controllers
         private readonly IOrderService _orderService;
         private readonly IValidationService _validationService;
 
+        /// <summary>
+        /// وابستگی های مورد نیاز کنترلر سفارش را دریافت میکند
+        /// </summary>
+        /// <param name="orderService">سرویس مدیریت سفارش و پرداخت</param>
+        /// <param name="validationService">سرویس اعتبارسنجی اطلاعات ورودی</param>
         public OrderController(IOrderService orderService,
             IValidationService validationService)
         {
@@ -63,6 +71,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get Admin
+        /// <summary>
+        /// اکشن دریافت فهرست سفارش ها را با صفحه بندی و مرتب سازی برای ادمین
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست سفارش ها یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/order")]
         public async Task<ActionResult> GetAllOrderAsync
@@ -73,6 +86,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت فهرست آیتم های سفارش ها را با صفحه بندی و مرتب سازی برای ادمین
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست آیتم ها یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/orderitem")]
         public async Task<ActionResult> GetAllOrderItemAsync
@@ -85,6 +103,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        /// <summary>
+        /// اکشن دریافت فهرست سفارش های کاربر با صفحه بندی و مرتب سازی
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست سفارش ها یا پیام خطا</returns>
         [HttpGet]
         public async Task<ActionResult> GetOrdersAsync
             ([FromQuery] QueryStringParameters parameters)
@@ -96,6 +119,12 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت آیتم های یک سفارش با صفحه بندی و مرتب سازی
+        /// </summary>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل آیتم های سفارش یا پیام خطا</returns>
         [HttpGet("{orderid}")]
         public async Task<ActionResult> GetOrderItemsAsync
             (int orderId, [FromQuery] QueryStringParameters parameters)
@@ -107,6 +136,12 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت یک آیتم مشخص از سفارش
+        /// </summary>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <param name="orderItemId">شناسه آیتم سفارش</param>
+        /// <returns>نتیجه شامل آیتم سفارش یا پیام خطا</returns>
         [HttpGet("{orderid}/{orderitemid}")]
         public async Task<ActionResult> GetOrderItemAsync(int orderId, int orderItemId)
         {
@@ -117,6 +152,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت فهرست پرداخت های کاربر با صفحه بندی و مرتب سازی
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست پرداخت ها یا پیام خطا</returns>
         [HttpGet("payment")]
         public async Task<ActionResult> GetPaymentsAsync
             ([FromQuery] QueryStringParameters parameters)
@@ -128,6 +168,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت اطلاعات پرداخت یک سفارش مشخص شده
+        /// </summary>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <returns>نتیجه شامل اطلاعات پرداخت یا پیام خطا</returns>
         [HttpGet("{orderid}/payment")]
         public async Task<ActionResult> GetPaymentAsync(int orderId)
         {
@@ -140,6 +185,10 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        /// <summary>
+        /// اکشن ایجاد یک سفارش از تمام آیتم های سبد خرید
+        /// </summary>
+        /// <returns>نتیجه شامل آیتم های سفارش ایجاد شده یا پیام خطا</returns>
         [HttpPost]
         public async Task<ActionResult> CreateOrderFromCartAsync()
         {
@@ -150,6 +199,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن ایجاد یک سفارش از یک آیتم سبد خرید مشخص شده
+        /// </summary>
+        /// <param name="cartItemId">شناسه آیتم سبد خرید</param>
+        /// <returns>نتیجه شامل آیتم سفارش ایجاد شده یا پیام خطا</returns>
         [HttpPost("{cartitemid}")]
         public async Task<ActionResult> CreateOrderFromCartItemAsync(int cartItemId)
         {
@@ -162,6 +216,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        /// <summary>
+        /// اکشن تغییر وضعیت یک سفارش مشخص شده
+        /// </summary>
+        /// <param name="changeOrderStatus">شناسه سفارش و وضعیت جدید</param>
+        /// <returns>نتیجه شامل سفارش به روز شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus)
@@ -176,6 +235,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن تغییر وضعیت پرداخت یک سفارش مشخص شده
+        /// </summary>
+        /// <param name="changePaymentStatus">شناسه سفارش و وضعیت پرداخت جدید</param>
+        /// <returns>نتیجه شامل پرداخت به روز شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpPut("payment")]
         public async Task<ActionResult> UpdatePaymentAsync(ChangePaymentStatusDto changePaymentStatus)
@@ -193,6 +257,11 @@ namespace OnlineShop.Api.Controllers
 
         #region Payment Process
 
+        /// <summary>
+        /// اکشن ایجاد درخواست پرداخت برای سفارش مشخص شده
+        /// </summary>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <returns>نشانی ورود به درگاه یا پیام خطا</returns>
         [HttpPost("{orderId}/payment")]
         public async Task<ActionResult> StartPayment(int orderId)
         {
@@ -205,6 +274,12 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن بررسی نتیجه پرداخت از درگاه
+        /// </summary>
+        /// <param name="authority">شناسه پرداخت دریافت شده از درگاه</param>
+        /// <param name="status">وضعیت بازگشتی درگاه</param>
+        /// <returns>نتیجه تایید پرداخت یا پیام خطا</returns>
         [AllowAnonymous]
         [HttpGet("payment/callback")]
         public async Task<ActionResult> PaymentCallback

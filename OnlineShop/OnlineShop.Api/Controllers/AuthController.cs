@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineShop.Api.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به اندپوینت های احراز هویت
+    /// </summary>
+    
     [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -15,6 +19,12 @@ namespace OnlineShop.Api.Controllers
         #region DI
         private readonly IAuthService _authService;
         private readonly IValidationService _validationService;
+
+        /// <summary>
+        /// وابستگی های مورد نیاز کنترلر احراز هویت را دریافت میکند
+        /// </summary>
+        /// <param name="authService">سرویس مدیریت کاربران</param>
+        /// <param name="validationService">سرویس اعتبارسنجی اطلاعات ورودی</param>
         public AuthController(IAuthService authService, IValidationService validationService)
         {
             _authService = authService;
@@ -32,7 +42,7 @@ namespace OnlineShop.Api.Controllers
             if (!validationResult.IsValid)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "ورودی ارسالی نامعتبر است";
+                result.Message = ".ورودی ارسالی نامعتبر است";
 
                 foreach (var error in validationResult.Errors)
                 {
@@ -49,6 +59,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region SignIn
+        /// <summary>
+        /// اکشن لاگین کاربر
+        /// </summary>
+        /// <param name="login">اطلاعات ورود شامل: ایمیل و رمزعبور</param>
+        /// <returns>درصورت احراز هویت موفق jwt توکن</returns>
         [HttpPost("signin")]
         public async Task<ActionResult> SignInAsync(LoginDto login)
         {
@@ -64,6 +79,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region SignUp
+        /// <summary>
+        /// اکشن ثبت نام کاربر
+        /// </summary>
+        /// <param name="register">اطلاعات ثبت نام: نام کاربری، ایمیل، رمزعبور و شماره تلفن</param>
+        /// <returns>درصورت احراز هویت موفق jwt توکن</returns>
         [HttpPost("signup")]
         public async Task<ActionResult> SignUpAsync(RegisterDto register)
         {
@@ -85,6 +105,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Forgot&Reset Password
+        /// <summary>
+        /// اکشن فراموشی رمز عبور
+        /// </summary>
+        /// <param name="forgotPassword">ایمیل ثبت نام شده</param>
+        /// <returns>توکن تعویض رمزعبور اگر ایمیل موجود باشد</returns>
         [HttpPost("forgotpassword")]
         public async Task<ActionResult> ForgotPasswordAsync(ForgotPasswordDto forgotPassword)
         {
@@ -98,6 +123,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن تعویض رمز عبور
+        /// </summary>
+        /// <param name="resetPassword">اطلاعات مورد نیاز: ایمیل، توکن و رمزعبور جدید</param>
+        /// <returns>پیغام موفقیت یا خطا</returns>
         [HttpPut("resetpassword")]
         public async Task<ActionResult> ResetPasswordAsync(ResetPasswordDto resetPassword)
         {
@@ -112,6 +142,10 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region GetUserRoles
+        /// <summary>
+        /// اکشن دریافت نقش تمامی کاربران
+        /// </summary>
+        /// <returns>فهرست تمام کاربران شامل ایمیل و نقش</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("user/roles")]
         public async Task<ActionResult> GetUserRolesAsync()
@@ -123,6 +157,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region ChangeUserRole
+        /// <summary>
+        /// اکشن بروزرسانی نقش کاربر
+        /// </summary>
+        /// <param name="roleChange">اطلاعات مورد نیاز شامل: ایمیل و نقش جدید</param>
+        /// <returns>پیغام موفقیت یا خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpPut("user/roles")]
         public async Task<ActionResult> UpdateUserRole(RoleChangeDto roleChange)

@@ -8,6 +8,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// منطق احراز هویت، ثبت نام، بازیابی رمز عبور و مدیریت نقش کاربران را اجرا میکند
+    /// </summary>
     public class AuthService : IAuthService
     {
         #region DI
@@ -16,6 +19,13 @@ namespace Application.Services
         private readonly IJwtTokenGenerator _jwtTokenGenerator;
         private readonly ILogger<AuthService> _logger;
 
+        /// <summary>
+        /// وابستگی های مورد نیاز سرویس احراز هویت را دریافت میکند
+        /// </summary>
+        /// <param name="authRepository">برای انجام کوئری های مربوط به کاربران و نقش ها</param>
+        /// <param name="tokenEncoder">برای کدگذاری و کدگشایی توکن بازیابی رمز عبور</param>
+        /// <param name="jwtTokenGenerator">JWT برای ایجاد توکن</param>
+        /// <param name="logger">برای ثبت رویدادها و خطاهای احراز هویت</param>
         public AuthService(IAuthRepository authRepository,
             ITokenEncoder tokenEncoder,
             IJwtTokenGenerator jwtTokenGenerator,
@@ -29,6 +39,11 @@ namespace Application.Services
         #endregion
 
         #region SignIn
+        /// <summary>
+        /// ایجاد میکند JWT پس از ورود موفق
+        /// </summary>
+        /// <param name="loginDto">اطلاعات ورود کاربر</param>
+        /// <returns>یا پیام خطا JWT نتیجه ورود شامل توکن</returns>
         public async Task<ServiceResult<JwtResponseDto>> SignInAsync(LoginDto loginDto)
         {
             var serviceResult = new ServiceResult<JwtResponseDto>();
@@ -63,6 +78,11 @@ namespace Application.Services
         #endregion
 
         #region SignUp
+        /// <summary>
+        /// ایجاد میکند JWT کاربر جدید را ثبت نام کرده و در صورت موفقیت توکن
+        /// </summary>
+        /// <param name="registerDto">اطلاعات ثبت نام کاربر</param>
+        /// <returns>یا پیام خطا JWT نتیجه ثبت نام شامل توکن</returns>
         public async Task<ServiceResult<JwtResponseDto>> SignUpAsync(RegisterDto registerDto)
         {
             var serviceResult = new ServiceResult<JwtResponseDto>();
@@ -95,6 +115,11 @@ namespace Application.Services
         #endregion
 
         #region ForgotPassword
+        /// <summary>
+        /// برای کاربر موجود، توکن بازیابی رمز عبور ایجاد میکند
+        /// </summary>
+        /// <param name="forgotPasswordDto">ایمیل کاربر برای بازیابی رمز عبور</param>
+        /// <returns>نتیجه شامل توکن بازیابی یا پیام خطا</returns>
         public async Task<ServiceResult<ResetTokenResponseDto>> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
             var serviceResult = new ServiceResult<ResetTokenResponseDto>();
@@ -125,9 +150,15 @@ namespace Application.Services
         #endregion
 
         #region ResetPassword
-        public async Task<ServiceResult<JwtResponseDto>> ResetPasswordAsync(ResetPasswordDto resetPassword)
+        /// <summary>
+        /// با استفاده از توکن بازیابی، رمز عبور کاربر را تغییر میدهد
+        /// </summary>
+        /// <param name="resetPassword">توکن بازیابی و رمز عبور جدید</param>
+        /// <returns>نتیجه تغییر رمز عبور</returns>
+        public async Task<ServiceResult<string>> ResetPasswordAsync
+            (ResetPasswordDto resetPassword)
         {
-            var serviceResult = new ServiceResult<JwtResponseDto>();
+            var serviceResult = new ServiceResult<string>();
 
             //decode token
             resetPassword.ResetToken = _tokenEncoder.Decode(resetPassword.ResetToken);
@@ -138,14 +169,14 @@ namespace Application.Services
             // check result
             if (result.IsSucceeded is false)
             {
-                serviceResult.Message = "تغییر رمز عبور انجام نشد.";
+                serviceResult.Message = ".تغییر رمز عبور انجام نشد";
                 serviceResult.StatusCode = ResultStatusCode.BadRequest;
                 serviceResult.Errors = result.Errors;
 
                 return serviceResult;
             }
 
-            serviceResult.Message = "رمز عبور با موفقیت تغییر کرد.";
+            serviceResult.Message = ".رمز عبور با موفقیت تغییر کرد";
             serviceResult.StatusCode = ResultStatusCode.Success;
 
             return serviceResult;
@@ -153,6 +184,10 @@ namespace Application.Services
         #endregion
 
         #region GetUserRoles
+        /// <summary>
+        /// فهرست نقش های موجود کاربران را دریافت میکند
+        /// </summary>
+        /// <returns>نتیجه شامل فهرست نقش ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<UserRolesDto>>> GetUserRolesAsync()
         {
             var result = new ServiceResult<IEnumerable<UserRolesDto>>();
@@ -161,7 +196,7 @@ namespace Application.Services
             if (!userRoles.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = ".هیچ رولی یافت نشد";
+                result.Message = ".هیچ نقشی یافت نشد";
 
                 return result;
             }
@@ -174,6 +209,11 @@ namespace Application.Services
         #endregion
 
         #region ChangeUserRole
+        /// <summary>
+        /// نقش کاربر مشخص شده را تغییر میدهد
+        /// </summary>
+        /// <param name="roleChange">شناسه کاربر و نقش جدید</param>
+        /// <returns>نتیجه تغییر نقش</returns>
         public async Task<ServiceResult<string>> ChangeUserRoleAsync(RoleChangeDto roleChange)
         {
             var serviceResult = new ServiceResult<string>();

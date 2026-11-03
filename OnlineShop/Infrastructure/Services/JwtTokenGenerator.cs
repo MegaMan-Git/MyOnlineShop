@@ -7,14 +7,27 @@ using System.Text;
 
 namespace Infrastructure.Services
 {
+    /// <summary>
+    /// است JWT مسئول ایجاد توکن های احراز هویت مبتنی بر
+    /// </summary>
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly IConfiguration _configuration;
+        /// <summary>
+        /// تنظیمات مورد نیاز برای ایجاد توکن را از طریق تزریق وابستگی دریافت میکند
+        /// </summary>
         public JwtTokenGenerator(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// امضاشده و دارای زمان انقضا ایجاد میکند JWT با اطلاعات کاربر، توکن
+        /// </summary>
+        /// <param name="email">توکن قرار میگیرد Claim ایمیل کاربر که در</param>
+        /// <param name="userId">توکن قرار میگیرد Claim شناسه کاربر که در</param>
+        /// <param name="role">توکن قرار میگیرد Claim نقش کاربر که برای احراز مجوز در</param>
+        /// <returns>JWT رشته حاوی توکن</returns>
         public string GenerateToken(string email, string userId, string role)
         {
             var securityKey = new SymmetricSecurityKey(

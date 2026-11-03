@@ -9,11 +9,20 @@ using Domain.Enums;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// منطق مدیریت دسته بندی های محصولات را اجرا میکند
+    /// </summary>
     public class CategoryService : ICategoryService
     {
         #region DI
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+
+        /// <summary>
+        /// وابستگی های موردنیاز سرویس دسته بندی را دریافت میکند
+        /// </summary>
+        /// <param name="unitOfWork">ها و ذخیره تغییرات Repository برای دسترسی به</param>
+        /// <param name="mapper">ها به یکدیگر DTO برای تبدیل موجودیت ها و</param>
         public CategoryService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -22,6 +31,11 @@ namespace Application.Services
         #endregion
 
         #region Get Category
+        /// <summary>
+        /// فهرست دسته بندی ها را با مرتب سازی و صفحه بندی دریافت میکند
+        /// </summary>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست دسته بندی ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<CategoryDto>>> GetAllCategoriesAsync
             (QueryStringParameters parameters)
         {
@@ -42,6 +56,11 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// دسته بندی ای را با شناسه آن دریافت میکند
+        /// </summary>
+        /// <param name="categoryId">شناسه دسته بندی</param>
+        /// <returns>نتیجه شامل دسته بندی یا پیام خطا</returns>
         public async Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(int categoryId)
         {
             var result = new ServiceResult<CategoryDto>();
@@ -63,6 +82,11 @@ namespace Application.Services
         #endregion
 
         #region Add Category
+        /// <summary>
+        /// دسته بندی جدیدی ایجاد میکند
+        /// </summary>
+        /// <param name="categoryDto">اطلاعات دسته بندی جدید</param>
+        /// <returns>نتیجه شامل دسته بندی ایجادشده یا پیام خطا</returns>
         public async Task<ServiceResult<CategoryDto>> AddCategoryAsync(AddCategoryDto categoryDto)
         {
             var result = new ServiceResult<CategoryDto>();
@@ -92,6 +116,11 @@ namespace Application.Services
         #endregion
 
         #region Update Category
+        /// <summary>
+        /// اطلاعات دسته بندی را به روزرسانی میکند
+        /// </summary>
+        /// <param name="categoryDto">اطلاعات جدید دسته بندی</param>
+        /// <returns>نتیجه شامل دسته بندی به روزشده یا پیام خطا</returns>
         public async Task<ServiceResult<CategoryDto>> UpdateCategoryAsync(UpdateCategoryDto categoryDto)
         {
             var result = new ServiceResult<CategoryDto>();
@@ -141,6 +170,11 @@ namespace Application.Services
         #endregion
 
         #region Delete Category
+        /// <summary>
+        /// دسته بندی را به صورت نرم حذف میکند
+        /// </summary>
+        /// <param name="categoryId">شناسه دسته بندی</param>
+        /// <returns>نتیجه حذف دسته بندی</returns>
         public async Task<ServiceResult<string>> SoftDeleteCategoryAsync(int categoryId)
         {
             var result = new ServiceResult<string>();

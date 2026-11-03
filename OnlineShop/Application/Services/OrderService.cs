@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// منطق ایجاد، مشاهده و مدیریت سفارش ها، پرداخت ها و موجودی محصولات را اجرا میکند
+    /// </summary>
     public class OrderService : IOrderService
     {
         #region DI
@@ -20,6 +23,13 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly ILogger<OrderService> _logger;
 
+        /// <summary>
+        /// وابستگی های موردنیاز سرویس سفارش را دریافت میکند
+        /// </summary>
+        /// <param name="unitOfWork">ها و ذخیره تغییرات Repository برای دسترسی به</param>
+        /// <param name="paymentGateway">برای ایجاد و تایید پرداخت از طریق درگاه</param>
+        /// <param name="mapper">ها به یکدیگر DTO برای تبدیل موجودیت ها و</param>
+        /// <param name="logger">برای ثبت رویدادها و خطاهای سفارش و پرداخت</param>
         public OrderService(IUnitOfWork unitOfWork,
             IPaymentGateway paymentGateway,
             IMapper mapper,
@@ -33,6 +43,11 @@ namespace Application.Services
         #endregion
 
         #region Get Order&OrderItem For Admin
+        /// <summary>
+        /// فهرست سفارش ها را برای ادمین با صفحه بندی و مرتب سازی دریافت میکند
+        /// </summary>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست سفارش ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<AdminOrderDto>>> GetAllOrdersForAdminAsync
             (QueryStringParameters parameters)
         {
@@ -54,6 +69,11 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// فهرست آیتم های سفارش ها را برای ادمین با صفحه بندی و مرتب سازی دریافت میکند
+        /// </summary>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست آیتم ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<AdminOrderItemDto>>> GetAllOrderItemsForAdminAsync
             (QueryStringParameters parameters)
         {
@@ -78,6 +98,12 @@ namespace Application.Services
         #endregion
 
         #region Get Order&OrderItem
+        /// <summary>
+        /// فهرست سفارش های متعلق به مشتری را با صفحه بندی و مرتب سازی دریافت میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست سفارش ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<CustomerOrderDto>>> GetOrdersAsync
             (string userId, QueryStringParameters parameters)
         {
@@ -100,6 +126,13 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// یک آیتم سفارش متعلق به مشتری را دریافت میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="orderItemId">شناسه آیتم سفارش</param>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <returns>نتیجه شامل آیتم سفارش یا پیام خطا</returns>
         public async Task<ServiceResult<CustomerOrderItemDto>> GetOrderItemAsync
             (string userId, int orderItemId, int orderId)
         {
@@ -110,7 +143,7 @@ namespace Application.Services
             if (order is null)
             {
                 result.StatusCode = ResultStatusCode.Forbidden;
-                result.Message = "سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست.";
+                result.Message = ".سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست";
 
                 return result;
             }
@@ -121,7 +154,7 @@ namespace Application.Services
             if (orderItemDto is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "آیتمی برای این سفارش یافت نشد.";
+                result.Message = ".آیتمی برای این سفارش یافت نشد";
 
                 return result;
             }
@@ -132,6 +165,13 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// آیتم های یک سفارش متعلق به مشتری را با صفحه بندی و مرتب سازی دریافت میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل آیتم های سفارش یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> GetOrderItemsAsync
             (string userId, int orderId, QueryStringParameters parameters)
         {
@@ -142,7 +182,7 @@ namespace Application.Services
             if (order is null)
             {
                 result.StatusCode = ResultStatusCode.Forbidden;
-                result.Message = "سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست.";
+                result.Message = ".سفارش یافت نشد یا دسترسی به آن امکان پذیر نیست";
 
                 return result;
             }
@@ -153,7 +193,7 @@ namespace Application.Services
             if (!orderItemsDto.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "آیتمی برای این سفارش یافت نشد.";
+                result.Message = ".آیتمی برای این سفارش یافت نشد";
 
                 return result;
             }
@@ -166,6 +206,12 @@ namespace Application.Services
         #endregion
 
         #region Get Payment
+        /// <summary>
+        /// اطلاعات پرداخت یک سفارش متعلق به مشتری را دریافت میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <returns>نتیجه شامل اطلاعات پرداخت یا پیام خطا</returns>
         public async Task<ServiceResult<PaymentDto>> GetPaymentAsync(string userId, int orderId)
         {
             var result = new ServiceResult<PaymentDto>();
@@ -195,6 +241,12 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// فهرست پرداخت های مشتری را با صفحه بندی و مرتب سازی دریافت میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست پرداخت ها یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<PaymentDto>>> GetPaymentsAsync
             (string userId, QueryStringParameters parameters)
         {
@@ -204,7 +256,7 @@ namespace Application.Services
             if (!payments.Any())
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "در حال حاضر هیچ تراکنشی برای شما ثبت نشده.";
+                result.Message = ".در حال حاضر هیچ تراکنشی برای شما ثبت نشده";
 
                 return result;
             }
@@ -217,6 +269,12 @@ namespace Application.Services
         #endregion
 
         #region Add OrderItem
+        /// <summary>
+        /// از یک آیتم سبد خرید، سفارش ایجاد میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="cartItemId">شناسه آیتم سبد خرید</param>
+        /// <returns>نتیجه شامل آیتم سفارش ایجادشده یا پیام خطا</returns>
         public async Task<ServiceResult<CustomerOrderItemDto>> CreateOrderFromCartItemAsync
             (string userId, int cartItemId)
         {
@@ -298,6 +356,11 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// از آیتم های سبد خرید، سفارش ایجاد میکند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <returns>نتیجه شامل آیتم های سفارش ایجادشده یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<CustomerOrderItemDto>>> CreateOrderFromCartItemsAsync
             (string userId)
         {
@@ -407,6 +470,13 @@ namespace Application.Services
         #endregion
 
         #region Payment Process
+        /// <summary>
+        /// برای سفارش، درخواست پرداخت ایجاد کرده و نشانی ورود به درگاه را برمیگرداند
+        /// </summary>
+        /// <param name="userId">شناسه مشتری</param>
+        /// <param name="orderId">شناسه سفارش</param>
+        /// <param name="callbackUrl">نشانی بازگشت از درگاه پرداخت</param>
+        /// <returns>نشانی ورود به درگاه یا پیام خطا</returns>
         public async Task<ServiceResult<string>> StartPaymentAsync
             (string userId, int orderId, string callbackUrl)
         {
@@ -498,6 +568,12 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// نتیجه پرداخت را از درگاه دریافت و پرداخت را تأیید میکند
+        /// </summary>
+        /// <param name="authority">شناسه پرداخت دریافت شده از درگاه</param>
+        /// <param name="gatewayStatus">وضعیت بازگشتی درگاه</param>
+        /// <returns>پرداخت موفق یا پیام خطا ReferenceId</returns>
         public async Task<ServiceResult<string>> VerifyPaymentAsync
             (string authority, string gatewayStatus)
         {
@@ -593,12 +669,19 @@ namespace Application.Services
         #endregion
 
         #region Update Payment
+        /// <summary>
+        /// وضعیت پرداخت سفارش را تغییر میدهد و در صورت نیاز وضعیت سفارش و موجودی را هماهنگ میکند
+        /// </summary>
+        /// <param name="changePaymentStatus">شناسه سفارش و وضعیت پرداخت جدید</param>
+        /// <returns>اطلاعات پرداخت به روزشده یا پیام خطا</returns>
         public async Task<ServiceResult<PaymentDto>> UpdatePaymentStatusAsync
             (ChangePaymentStatusDto changePaymentStatus)
         {
             var result = new ServiceResult<PaymentDto>();
 
-            var order = await _unitOfWork.orderRepository.GetOrderByIdAsync(changePaymentStatus.OrderId);
+            var order = await _unitOfWork.orderRepository
+                .GetOrderByIdAsync(changePaymentStatus.OrderId);
+            
             if (order is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -683,11 +766,19 @@ namespace Application.Services
         #endregion
 
         #region Update Order
-        public async Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync(ChangeOrderStatusDto changeOrderStatus)
+        /// <summary>
+        /// وضعیت سفارش را تغییر داده و موجودی و وضعیت پرداخت را هماهنگ میکند
+        /// </summary>
+        /// <param name="changeOrderStatus">شناسه سفارش و وضعیت جدید</param>
+        /// <returns>اطلاعات سفارش به روزشده یا پیام خطا</returns>
+        public async Task<ServiceResult<AdminOrderDto>> UpdateOrderStatusAsync
+            (ChangeOrderStatusDto changeOrderStatus)
         {
             var result = new ServiceResult<AdminOrderDto>();
 
-            var order = await _unitOfWork.orderRepository.GetOrderByIdAsync(changeOrderStatus.OrderId);
+            var order = await _unitOfWork.orderRepository
+                .GetOrderByIdAsync(changeOrderStatus.OrderId);
+            
             if (order is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -790,7 +881,8 @@ namespace Application.Services
 
 
             result.StatusCode = ResultStatusCode.Success;
-            result.Data = await _unitOfWork.orderRepository.GetOrderForAdminAsync(changeOrderStatus.OrderId);
+            result.Data = await _unitOfWork.orderRepository
+                .GetOrderForAdminAsync(changeOrderStatus.OrderId);
 
             return result;
         }

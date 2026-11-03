@@ -4,6 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<!--swager فعال سازی ساخت مستند خودکار توسط -->
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<!--برای اینکه مجبور نباشیم برای تمام تک تک متدها یا کلاس های عمومی کامنت بذاریم-->
+	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

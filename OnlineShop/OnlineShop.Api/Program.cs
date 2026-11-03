@@ -17,9 +17,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OnlineShop.Api.Middlewares;
 using Serilog;
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 
+#region Logger confing
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
@@ -29,6 +31,7 @@ Log.Logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day,
         rollOnFileSizeLimit: true)
     .CreateBootstrapLogger();
+#endregion
 
 try
 {
@@ -86,6 +89,18 @@ try
     builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
     #endregion
 
+    #region Add xml document
+    builder.Services.AddSwaggerGen(options =>
+    {
+        var xmlFile =
+            $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+        options.IncludeXmlComments(xmlPath);
+    });
+    #endregion
+
     #region Ioc Container
     builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
     builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -137,7 +152,6 @@ try
             };
         });
     #endregion
-
 
     #endregion
 

@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineShop.Api.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به مدیریت محصولات
+    /// </summary>
     [Route("api/product")]
     [ApiController]
     public class ProductController : ControllerBase
@@ -16,6 +19,12 @@ namespace OnlineShop.Api.Controllers
         #region DI
         private readonly IProductService _productService;
         private readonly IValidationService _validationService;
+
+        /// <summary>
+        /// وابستگی های مورد نیاز کنترلر محصول را دریافت میکند
+        /// </summary>
+        /// <param name="productService">سرویس مدیریت محصولات</param>
+        /// <param name="validationService">سرویس اعتبارسنجی اطلاعات ورودی</param>
         public ProductController(IProductService productService, IValidationService validationService)
         {
             _productService = productService;
@@ -50,6 +59,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        /// <summary>
+        /// اکشن دریافت فهرست محصولات با صفحه بندی و مرتب سازی
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست محصولات یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
         public async Task<ActionResult> GetAllProductsAsync
@@ -60,6 +74,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت یک محصول مشخص شده
+        /// </summary>
+        /// <param name="id">شناسه محصول</param>
+        /// <returns>نتیجه شامل محصول یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetProductByIdAsync(int id)
@@ -72,6 +91,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        /// <summary>
+        /// اکشن افزودن یک محصول جدید
+        /// </summary>
+        /// <param name="product">اطلاعات محصول جدید</param>
+        /// <returns>نتیجه شامل محصول ایجاد شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller")]
         [HttpPost]
         public async Task<ActionResult> AddProductAsync(AddProductDto product)
@@ -88,6 +112,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        /// <summary>
+        /// اکشن بروزرسانی اطلاعات یک محصول
+        /// </summary>
+        /// <param name="product">اطلاعات جدید محصول</param>
+        /// <returns>نتیجه شامل محصول به روز شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller")]
         [HttpPut]
         public async Task<ActionResult> UpdateProductAsync(UpdateProductDto product)
@@ -104,6 +133,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        /// <summary>
+        /// اکشن حذف یک محصول به صورت نرم
+        /// </summary>
+        /// <param name="id">شناسه محصول</param>
+        /// <returns>نتیجه حذف محصول</returns>
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProductAsync(int id)

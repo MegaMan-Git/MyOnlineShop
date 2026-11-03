@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace OnlineShop.Api.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به مدیریت دسته بندی های محصولات
+    /// </summary>
     [Route("api/category")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -16,6 +19,12 @@ namespace OnlineShop.Api.Controllers
         #region DI
         private readonly ICategoryService _categoryService;
         private readonly IValidationService _validationService;
+
+        /// <summary>
+        /// وابستگی های مورد نیاز کنترلر دسته بندی را دریافت میکند
+        /// </summary>
+        /// <param name="categoryService">سرویس مدیریت دسته بندی</param>
+        /// <param name="validationService">سرویس اعتبارسنجی اطلاعات ورودی</param>
         public CategoryController(ICategoryService categoryService, IValidationService validationService)
         {
             _categoryService = categoryService;
@@ -50,6 +59,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        /// <summary>
+        /// اکشن دریافت فهرست دسته بندی ها با صفحه بندی و مرتب سازی
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست دسته بندی ها یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet]
         public async Task<ActionResult> GetAllCategoryAsync
@@ -60,6 +74,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت دسته بندی مشخص شده
+        /// </summary>
+        /// <param name="id">شناسه دسته بندی</param>
+        /// <returns>نتیجه شامل دسته بندی یا پیام خطا</returns>
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCategoryByIdAsync(int id)
@@ -71,6 +90,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        /// <summary>
+        /// اکشن افزودن یک دسته بندی جدید
+        /// </summary>
+        /// <param name="category">اطلاعات دسته بندی جدید</param>
+        /// <returns>نتیجه شامل دسته بندی ایجاد شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult> AddCategoryAsync(AddCategoryDto category)
@@ -87,6 +111,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        /// <summary>
+        /// اکشن بروزرسانی نام یک دسته بندی
+        /// </summary>
+        /// <param name="category">شناسه و نام جدید دسته بندی</param>
+        /// <returns>نتیجه شامل دسته بندی به روز شده یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<ActionResult> UpdateCategoryAsync(UpdateCategoryDto category)
@@ -103,6 +132,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        /// <summary>
+        /// اکشن حذف یک دسته بندی به صورت نرم
+        /// </summary>
+        /// <param name="id">شناسه دسته بندی</param>
+        /// <returns>نتیجه حذف دسته بندی</returns>
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCategoryAsync(int id)

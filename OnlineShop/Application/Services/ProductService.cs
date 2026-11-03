@@ -9,11 +9,20 @@ using Domain.Enums;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// منطق مدیریت محصولات، موجودی و حذف نرم محصولات را اجرا میکند
+    /// </summary>
     public class ProductService : IProductService
     {
         #region DI
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+
+        /// <summary>
+        /// وابستگی های موردنیاز سرویس محصول را دریافت میکند
+        /// </summary>
+        /// <param name="unitOfWork">ها و ذخیره تغییرات Repository برای دسترسی به</param>
+        /// <param name="mapper">ها به یکدیگر DTO برای تبدیل موجودیت ها و</param>
         public ProductService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
@@ -22,13 +31,19 @@ namespace Application.Services
         #endregion
 
         #region Get Product
+        /// <summary>
+        /// فهرست محصولات را با مرتب سازی و صفحه بندی دریافت میکند
+        /// </summary>
+        /// <param name="parameters">پارامترهای صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست محصولات یا پیام خطا</returns>
         public async Task<ServiceResult<IEnumerable<ProductDto>>> GetAllProductsAsync
             (QueryStringParameters parameters)
         {
             var result = new ServiceResult<IEnumerable<ProductDto>>();
 
             //get all products
-            var products = await _unitOfWork.productRepository.GetAllProductsAsync(parameters);
+            var products = await _unitOfWork.productRepository
+                .GetAllProductsAsync(parameters);
 
             if (!products.Any())
             {
@@ -44,6 +59,11 @@ namespace Application.Services
             return result;
         }
 
+        /// <summary>
+        /// محصولی را با شناسه آن دریافت میکند
+        /// </summary>
+        /// <param name="id">شناسه محصول</param>
+        /// <returns>نتیجه شامل محصول یا پیام خطا</returns>
         public async Task<ServiceResult<ProductDto>> GetProductByIdAsync(int id)
         {
             var result = new ServiceResult<ProductDto>();
@@ -54,7 +74,7 @@ namespace Application.Services
             if (product is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
-                result.Message = "محصولی با آیدی مورد نظر یافت نشد.";
+                result.Message = ".محصولی با آیدی مورد نظر یافت نشد";
 
                 return result;
             }
@@ -67,12 +87,19 @@ namespace Application.Services
         #endregion
 
         #region Add Product
+        /// <summary>
+        /// محصول جدیدی را به فروشگاه اضافه میکند
+        /// </summary>
+        /// <param name="productDto">اطلاعات محصول جدید</param>
+        /// <returns>نتیجه شامل محصول ایجادشده یا پیام خطا</returns>
         public async Task<ServiceResult<ProductDto>> AddProductAsync(AddProductDto productDto)
         {
             var result = new ServiceResult<ProductDto>();
 
             //is category exist?
-            var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync((int)productDto.CategoryId!);
+            var category = await _unitOfWork.categoryRepository
+                .GetCategoryByIdAsync(productDto.CategoryId!.Value);
+            
             if (category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -81,7 +108,7 @@ namespace Application.Services
                 return result;
             }
 
-            // is productname before exist?
+            //is productname before exist?
             var isDuplicate = await _unitOfWork.productRepository
                 .IsProductNameDuplicateAsync(productDto.ProductName);
             if (isDuplicate)
@@ -108,6 +135,11 @@ namespace Application.Services
         #endregion
 
         #region Update Product
+        /// <summary>
+        /// اطلاعات محصول را به روزرسانی میکند
+        /// </summary>
+        /// <param name="productDto">اطلاعات جدید محصول</param>
+        /// <returns>نتیجه شامل محصول به روزشده یا پیام خطا</returns>
         public async Task<ServiceResult<ProductDto>> UpdateProductAsync(UpdateProductDto productDto)
         {
             var result = new ServiceResult<ProductDto>();
@@ -123,7 +155,9 @@ namespace Application.Services
             }
 
             //is category exist?
-            var category = await _unitOfWork.categoryRepository.GetCategoryByIdAsync((int)productDto.CategoryId!);
+            var category = await _unitOfWork.categoryRepository
+                .GetCategoryByIdAsync(productDto.CategoryId!.Value);
+
             if (category is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;
@@ -159,12 +193,18 @@ namespace Application.Services
         #endregion
 
         #region Delete Product
+        /// <summary>
+        /// محصول را به صورت نرم حذف کرده و آیتم های مربوط به آن را از سبدهای خرید حذف میکند
+        /// </summary>
+        /// <param name="id">شناسه محصول</param>
+        /// <returns>نتیجه حذف محصول</returns>
         public async Task<ServiceResult<string>> SoftDeleteProductAsync(int id)
         {
             var result = new ServiceResult<string>();
 
             //find product
             var product = await _unitOfWork.productRepository.GetProductByIdAsync(id);
+
             if (product is null)
             {
                 result.StatusCode = ResultStatusCode.NotFound;

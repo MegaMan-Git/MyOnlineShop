@@ -3,11 +3,19 @@ using Domain.Enums;
 
 namespace OnlineShop.Api.Middlewares;
 
+/// <summary>
+/// استثناهای رخ داده در طول پردازش درخواست را مدیریت میکند
+/// </summary>
 public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
 
+    /// <summary>
+    /// نیازمندی های میدلور را تزریق میکند
+    /// </summary>
+    /// <param name="next">منتقل میکند Pipeline درخواست را به بخش بعدی</param>
+    /// <param name="logger">برای ثبت اطلاعات استثناهای رخ داده استفاده میشود</param>
     public GlobalExceptionMiddleware(
         RequestDelegate next,
         ILogger<GlobalExceptionMiddleware> logger)
@@ -16,6 +24,10 @@ public class GlobalExceptionMiddleware
         _logger = logger;
     }
 
+    /// <summary>
+    /// درخواست را اجرا کرده و در صورت وقوع استثنا پاسخ خطای مناسب را ارسال میکند
+    /// </summary>
+    /// <param name="context">است Http شامل اطلاعات درخواست و پاسخ</param>
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -34,6 +46,11 @@ public class GlobalExceptionMiddleware
         }
     }
 
+    /// <summary>
+    /// پاسخ خطا را بر اساس محیط اجرای برنامه ایجاد و ارسال میکند
+    /// </summary>
+    /// <param name="context">است Http شامل اطلاعات درخواست و پاسخ</param>
+    /// <param name="exception">استثنای رخ داده در زمان پردازش درخواست</param>
     private static async Task WriteErrorResponseAsync(
         HttpContext context,
         Exception exception)

@@ -8,11 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
+    /// <summary>
+    /// Identity مربوط به مدیریت کاربران، احراز هویت و عملیات مرتبط با Repository
+    /// </summary>
     public class AuthRepository : IAuthRepository
     {
-        #region DI
+        #region DI 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly OnlineShopContext _context;
+        /// <summary>
+        /// دریافت میکند Dependency Injection را از طریق Repository وابستگی های مورد نیاز
+        /// </summary>
         public AuthRepository(UserManager<ApplicationUser> userManager,
             OnlineShopContext context)
         {
@@ -22,19 +28,33 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region IsUserExist
-        public async Task<bool> IsUserExistAsync(string Email)
+        /// <summary>
+        /// بررسی وجود کاربر بر اساس ایمیل
+        /// </summary>
+        /// <param name="email">ایمیل ارسال شده جهت پیدا کردن کاربر</param>
+        /// <returns>اگر کاربر پیدا شود درست و اگر نشود نادرست</returns>
+        public async Task<bool> IsUserExistAsync(string email)
         {
-            var result = await _userManager.FindByEmailAsync(Email);
+            var result = await _userManager.FindByEmailAsync(email);
 
             return (result is not null);
         }
         #endregion
 
         #region GeneratePasswordResetToken
+        /// <summary>
+        /// ایجاد توکن جدید برای کاربر در صورت فراموشی رمز عبور
+        /// </summary>
+        /// <param name="forgotPassword">
+        /// شامل ایمیل کاربر Dto
+        /// </param>
+        /// <returns>
+        /// یک توکن در صورت وجود ایمیل یا رشته ای خالی در صورت وجود نداشتن کاربر
+        /// </returns>
         public async Task<string> GeneratePasswordResetTokenAsync(ForgotPasswordDto forgotPassword)
         {
             var user = await _userManager.FindByEmailAsync(forgotPassword.Email);
-            if (user == null)
+            if (user is null)
             {
                 return string.Empty;
             }
@@ -44,6 +64,13 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region Reset password
+        /// <summary>
+        /// تغییر رمز عبور در صورت ارسال توکن از قبل ساخته شده توسط درخواست فراموشی رمز عبور
+        /// </summary>
+        /// <param name="resetPassword">
+        /// اطلاعات مورد نیاز ریست شامل ایمیل، توکن و رمز جدید
+        /// </param>
+        /// <returns>نتیجه ی درخواست و خطاهای آن در صورت عدم موفقیت</returns>
         public async Task<Result> ResetPasswordAsync(ResetPasswordDto resetPassword)
         {
             var result = new Result();
@@ -63,10 +90,8 @@ namespace Infrastructure.Repositories
             if (identityResult.Succeeded is false)
             {
                 result.IsSucceeded = false;
-                foreach (var err in identityResult.Errors)
-                {
-                    result.Errors.Add(err.Description);
-                }
+                result.Errors.AddRange(
+                    identityResult.Errors.Select(x => x.Description)); 
 
                 return result;
             }
@@ -77,6 +102,11 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region SignIn
+        /// <summary>
+        /// با استفاده از ایمیل و رمز عبور کاربر را احراز هویت میکند
+        /// </summary>
+        /// <param name="login">اطلاعات ورود شامل: ایمیل و رمز عبور</param>
+        /// <returns>نتیجه احراز هویت به همراه شناسه و نقش کاربر</returns>
         public async Task<Result> SignInAsync(LoginDto login)
         {
             var result = new Result();
@@ -114,6 +144,11 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region SignUp
+        /// <summary>
+        /// با دریافت اطلاعات مورد نیاز توسط پارامتر ورودی کاربر را ثبت نام میکند
+        /// </summary>
+        /// <param name="register">اطلاعات ثبت نام شامل: نام کاربری، ایمیل، رمز عبور و شماره همراه</param>
+        /// <returns>نتیجه ثبت نام به همراه شناسه و نقش کاربر</returns>
         public async Task<Result> SignUpAsync(RegisterDto register)
         {
             var result = new Result();
@@ -160,6 +195,10 @@ namespace Infrastructure.Repositories
         #endregion
 
         #region GetUserRoles
+        /// <summary>
+        /// دریافت نقش تمام کاربران موجود
+        /// </summary>
+        /// <returns>نتیجه شامل فهرست نقش ها یا پیام خطا</returns>
         public async Task<IEnumerable<UserRolesDto>> GetUserRolesAsync()
         {
             return await (
@@ -172,11 +211,16 @@ namespace Infrastructure.Repositories
                 {
                     Email = users.Email,
                     Role = roles.Name
-                }).ToListAsync();
+                }).AsNoTracking().ToListAsync();
         }
         #endregion
 
         #region ChangeUserRole
+        /// <summary>
+        /// تغییر نقش کاربر توسط ادمین
+        /// </summary>
+        /// <param name="roleChange">اطلاعاتی شامل ایمیل و نقش جدید</param>
+        /// <returns>نتیجه درخواست به همراه خطاها در صورت عدم موفقیت</returns>
         public async Task<Result> ChangeUserRoleAsync(RoleChangeDto roleChange)
         {
             var result = new Result();

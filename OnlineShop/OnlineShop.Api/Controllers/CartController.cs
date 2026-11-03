@@ -10,6 +10,9 @@ using System.Security.Claims;
 
 namespace OnlineShop.Api.Controllers
 {
+    /// <summary>
+    /// کنترلر مربوط به مدیریت سبد خرید کاربران و مدیران
+    /// </summary>
     [Route("api/cart")]
     [ApiController]
     [Authorize]
@@ -18,6 +21,12 @@ namespace OnlineShop.Api.Controllers
         #region DI
         private readonly ICartService _cartService;
         private readonly IValidationService _validationService;
+
+        /// <summary>
+        /// وابستگی های مورد نیاز کنترلر سبد خرید را دریافت میکند
+        /// </summary>
+        /// <param name="cartService">سرویس مدیریت سبد خرید</param>
+        /// <param name="validationService">سرویس اعتبارسنجی اطلاعات ورودی</param>
         public CartController(ICartService cartService,
             IValidationService validationService)
         {
@@ -45,7 +54,7 @@ namespace OnlineShop.Api.Controllers
             if (!validationResult.IsValid)
             {
                 result.StatusCode = ResultStatusCode.BadRequest;
-                result.Message = "ورودی ارسالی نامعتبر است";
+                result.Message = ".ورودی ارسالی نامعتبر است";
 
                 foreach (var error in validationResult.Errors)
                 {
@@ -62,6 +71,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get Admin
+        /// <summary>
+        /// اکشن دریافت فهرست سبدهای خرید برای ادمین
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست سبد های خرید یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("admin")]
         public async Task<ActionResult> GetAllCartsAsync
@@ -72,6 +86,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت فهرست آیتم های سبدهای خرید برای ادمین
+        /// </summary>
+        /// <param name="parameters">پارامتر های صفحه بندی و مرتب سازی</param>
+        /// <returns>نتیجه شامل فهرست آیتم ها یا پیام خطا</returns>
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/items")]
         public async Task<ActionResult> GetAllCartItemsAsync
@@ -84,6 +103,10 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Get
+        /// <summary>
+        /// اکشن دریافت آیتم های سبد خرید برای کاربر
+        /// </summary>
+        /// <returns>نتیجه شامل آیتم های سبد خرید یا پیام خطا</returns>
         [HttpGet]
         public async Task<ActionResult> GetCartItemsAsync()
         {
@@ -94,6 +117,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن دریافت یک آیتم سبد خرید مشخص شده
+        /// </summary>
+        /// <param name="id">شناسه آیتم سبد خرید</param>
+        /// <returns>نتیجه شامل آیتم سبد خرید یا پیام خطا</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult> GetCartItemAsync(int id)
         {
@@ -106,6 +134,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Post
+        /// <summary>
+        /// اکشن افزودن یک آیتم به سبد خرید
+        /// </summary>
+        /// <param name="cartItemDto">اطلاعات محصول و تعداد مورد نیاز</param>
+        /// <returns>نتیجه شامل آیتم اضافه شده یا پیام خطا</returns>
         [HttpPost]
         public async Task<ActionResult> AddCartItem(AddCartItemDto cartItemDto)
         {
@@ -123,6 +156,11 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Put
+        /// <summary>
+        /// اکشن بروزرسانی یک آیتم در سبد خرید
+        /// </summary>
+        /// <param name="cartItemDto">شناسه آیتم و تعداد جدید</param>
+        /// <returns>نتیجه شامل آیتم به روز شده یا پیام خطا</returns>
         [HttpPut]
         public async Task<ActionResult> UpdateCartItem(UpdateCartItemDto cartItemDto)
         {
@@ -140,6 +178,10 @@ namespace OnlineShop.Api.Controllers
         #endregion
 
         #region Delete
+        /// <summary>
+        /// اکشن حذف تمامی آیتم های سبد خرید
+        /// </summary>
+        /// <returns>نتیجه حذف آیتم ها</returns>
         [HttpDelete]
         public async Task<ActionResult> DeleteCartItemsAsync()
         {
@@ -150,6 +192,11 @@ namespace OnlineShop.Api.Controllers
             return StatusCode((int)result.StatusCode, result);
         }
 
+        /// <summary>
+        /// اکشن حذف یک آیتم از سبد خرید با شناسه آیتم
+        /// </summary>
+        /// <param name="id">شناسه آیتم سبد خرید</param>
+        /// <returns>نتیجه حذف آیتم</returns>
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCartItemAsync(int id)
         {
